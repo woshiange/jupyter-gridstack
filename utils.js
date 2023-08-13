@@ -11,11 +11,29 @@ export const addToBody = `
 </template>
 
 <div class="app-bar">
-  <button id="toggleButton">Toggle Nested Elements</button>
+  <button onclick = "goToEdit()">Toggle Nested Elements</button>
   <button id="toggleButton2">Toggle Nested Elements</button>
 </div>
 
 <script>
+  window.addEventListener('message', function(event) {
+    if(event.type === 'message' && event.data === 'editReady') {
+      console.log('ok ok all good')
+    }
+  }, false)
+
+  function goToEdit() {
+    const iframe = document.createElement('iframe')
+    iframe.src = 'https://jupyter-gridstack.pages.dev/load'
+    document.body.appendChild(iframe)
+    const result = iframe.contentWindow.postMessage(
+      {
+        call:'sendData',
+        transformedNotedbook: 'serbe',
+      }, "*")
+  }
+
+
   function addMaskCss() {
   var styles = \`
   .mask {
