@@ -6,6 +6,8 @@ export default {
   methods: {
     addEventSetLocalStorage () {
       window.addEventListener('message', function(event) {
+        console.log('kurde')
+        console.log(event)
         if (!(typeof event.data == 'object' && event.data.call=='sendData')) {
           return
         }
