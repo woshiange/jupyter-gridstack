@@ -12,13 +12,9 @@ export default {
         localStorage.setItem('transformedNotebook', event.data.transformedNotebook)
         parent.postMessage("localStorageReady", "*")
       }, false)
-    },
-    sendEditReady () {
-      parent.postMessage("editReady", "*")
-    },
+    }
   },
   mounted() {
-    this.sendEditReady()
     this.addEventSetLocalStorage()
   },
   unmounted() {

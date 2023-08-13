@@ -17,7 +17,7 @@ export const addToBody = `
 
 <script>
   window.addEventListener('message', function(event) {
-    if(event.type === 'message' && event.data === 'editReady') {
+    if(event.type === 'message' && event.data === 'localStorageReady') {
       console.log('ok ok all good')
     }
   }, false)
