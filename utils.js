@@ -18,6 +18,11 @@ export const addToBody = `
 <iframe id="iframe-loader" width="0" height="0" src="https://jupyter-gridstack.pages.dev/load">
 
 <script>
+  function removeAppBar() {
+    const appBar = document.querySelectorAll('.app-bar')[0]
+    appBar.style.display = 'none';
+  }
+
   function handleLocalStorageReadyEvent () {
     console.log('local storage ready local')
   }
@@ -72,10 +77,6 @@ export const addToBody = `
   }
   window.document.addEventListener('editGridEvent', handleEditGridEvent, false)
   
-  function removeAppBar() {
-    const appBar = document.querySelectorAll('.app-bar')[0]
-    appBar.style.display = 'none';
-  }
 
 </script>
 `
