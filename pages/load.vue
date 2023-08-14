@@ -1,4 +1,5 @@
 <template>
+<p>loading...</p>
 </template>
 
 <script setup>
