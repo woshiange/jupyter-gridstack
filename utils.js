@@ -18,16 +18,20 @@ export const addToBody = `
 
 <script>
   var editReady = false
+  function sendNotebook () {
+    const iframe = document.getElementById('iframeLoader')
+    iframe.contentWindow.postMessage(
+      {
+        call:'sendData',
+        transformedNotedbook: 'hello serbe',
+      }, "*"
+    )
+  }
   window.addEventListener('message', function(event) {
     if(event.type === 'message' && event.data === 'editReady') {
-      console.log('edit ready')
       editReady = true
-      const iframe = document.getElementById('iframeLoader')
-      iframe.contentWindow.postMessage(
-          {
-              call:'sendData',
-              transformedNotedbook: 'hello serbe',
-          }, "*")
+      console.log('edit ready')
+      sendNotebook()
     }
     if(event.type === 'message' && event.data === 'uploadReady') {
       console.log('upload ready')
@@ -36,12 +40,7 @@ export const addToBody = `
 
   function goToEdit() {
     if(editReady) {
-      const iframe = document.getElementById('iframeLoader')
-      iframe.contentWindow.postMessage(
-          {
-              call:'sendData',
-              transformedNotedbook: 'hello serbe',
-          }, "*")
+      sendNotebook()
       return
     }
     const iframe = document.createElement('iframe')
