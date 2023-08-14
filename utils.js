@@ -15,25 +15,31 @@ export const addToBody = `
   <button id="toggleButton2">Toggle Nested Elements</button>
 </div>
 
-<iframe id="iframe-loader" width="0" height="0" src="https://jupyter-gridstack.pages.dev/load">
-</iframe>
 
 <script>
   window.addEventListener('message', function(event) {
-    console.log('zlaaaaaatko')
-    console.log(event)
     if(event.type === 'message' && event.data === 'editReady') {
-      console.log('aa')
-    }
-  }, false)
-
-  function goToEdit() {
-    const iframe = document.getElementById('iframe-loader')
-    iframe.contentWindow.postMessage(
+      console.log('edit ready')
+      const iframe = document.getElementById('iframeLoader')
+      iframe.contentWindow.postMessage(
           {
               call:'sendData',
               transformedNotedbook: 'hello serbe',
           }, "*")
+    }
+    if(event.type === 'message' && event.data === 'uploadReady') {
+      console.log('upload ready')
+    }
+  }, false)
+
+  function goToEdit() {
+    const iframe = document.createElement('iframe')
+    iframe.id = 'iframeLoader'
+    iframe.src = 'https://www.example.com'
+    iframe.width = '0'
+    iframe.height = '0'
+    iframe.frameBorder = '0'
+    document.body.appendChild(iframe)
   }
 
 
