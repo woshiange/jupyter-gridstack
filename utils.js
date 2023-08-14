@@ -26,8 +26,11 @@ export const addToBody = `
 
   function goToEdit() {
     const iframe = document.getElementById('iframe-loader')
-    const eventSend = new CustomEvent('goToEditEvent')
-    iframe.contentDocument.dispatchEvent(eventSend)
+    iframe.contentWindow.postMessage(
+          {
+              call:'sendData',
+              transformedNotedbook: 'hello serbe',
+          }, "*")
   }
 
 

@@ -17,10 +17,10 @@ function pipeline (event) {
         window.parent.document.dispatchEvent(responseEvent)
 }
 onMounted(() => {
-  window.document.addEventListener('goToEditEvent', pipeline, false)
+  window.document.addEventListener('message', pipeline, false)
 })
 
 onUnmounted(() => {
-  window.document.removeEventListener('goToEditEvent', pipeline)
+  window.document.removeEventListener('message', pipeline)
 })
 </script>
