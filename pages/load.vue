@@ -10,10 +10,11 @@ export default {
           return
         }
     */
+        console.log('1')
         if (!(typeof event.type == 'message' && event.data ==='sendData')) {
           return
         }
-        console.log('ok')
+        console.log('2')
 
         localStorage.setItem('transformedNotebook', event.data.transformedNotebook)
         parent.postMessage("localStorageReady", "*")
