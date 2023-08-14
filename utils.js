@@ -17,9 +17,11 @@ export const addToBody = `
 
 
 <script>
+  var editReady = false
   window.addEventListener('message', function(event) {
     if(event.type === 'message' && event.data === 'editReady') {
       console.log('edit ready')
+      editReady = true
       const iframe = document.getElementById('iframeLoader')
       iframe.contentWindow.postMessage(
           {
@@ -33,9 +35,18 @@ export const addToBody = `
   }, false)
 
   function goToEdit() {
+    if(editReady) {
+      const iframe = document.getElementById('iframeLoader')
+      iframe.contentWindow.postMessage(
+          {
+              call:'sendData',
+              transformedNotedbook: 'hello serbe',
+          }, "*")
+      return
+    }
     const iframe = document.createElement('iframe')
     iframe.id = 'iframeLoader'
-    iframe.src = 'https://www.example.com'
+    iframe.src = 'https://jupyter-gridstack.pages.dev/load'
     iframe.width = '0'
     iframe.height = '0'
     iframe.frameBorder = '0'
