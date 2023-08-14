@@ -14,8 +14,7 @@ function pipeline (event) {
         console.log('2')
 
         //localStorage.setItem('transformedNotebook', event.data.transformedNotebook)
-        var responseEvent = new CustomEvent('localStorageReadyEvent')
-        window.parent.document.dispatchEvent(responseEvent)
+        parent.postMessage("uploadReady", "*")
 }
 onMounted(() => {
   console.log('hello from load')

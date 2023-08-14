@@ -19,10 +19,13 @@ export const addToBody = `
 </iframe>
 
 <script>
-  function handleLocalStorageReadyEvent () {
-    console.log('local storage ready local')
-  }
-  window.document.addEventListener('localStorageReadyEvent', handleLocalStorageReadyEvent, false)
+  window.addEventListener('message', function(event) {
+    console.log('zlaaaaaatko')
+    console.log(event)
+    if(event.type === 'message' && event.data === 'editReady') {
+      console.log('aa')
+    }
+  }, false)
 
   function goToEdit() {
     const iframe = document.getElementById('iframe-loader')
