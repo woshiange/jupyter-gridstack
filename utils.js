@@ -16,21 +16,17 @@ export const addToBody = `
 </div>
 
 <script>
-  window.addEventListener('message', function(event) {
-    if(event.type === 'message' && event.data === 'localStorageReady') {
-      console.log('ok ok all good')
-    }
-  }, false)
+  function handleLocalStorageReadyEvent () {
+    console.log('local storage ready local')
+  }
+  window.document.addEventListener('localStorageReadyEvent', handleLocalStorageReadyEvent, false)
 
   function goToEdit() {
     const iframe = document.createElement('iframe')
     iframe.src = 'https://jupyter-gridstack.pages.dev/load'
     document.body.appendChild(iframe)
-    const result = iframe.contentWindow.postMessage(
-      {
-        call:'sendData',
-        transformedNotedbook: 'serbe',
-      }, "*")
+    const eventSend = new CustomEvent('goToEditEvent')
+    iframe.contentDocument.dispatchEvent(eventSend)
   }
 
 

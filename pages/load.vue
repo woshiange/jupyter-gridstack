@@ -1,31 +1,25 @@
 <template>
 </template>
 
-<script>
-export default {
-  methods: {
-    pipeline (event) {
+<script setup>
+function pipeline (event) {
     /*
         if (!(typeof event.data == 'object' && event.data.call=='sendData')) {
           return
         }
     */
         console.log('1')
-        if (!(typeof event.type == 'message' && event.data ==='sendData')) {
-          return
-        }
         console.log('2')
 
-        localStorage.setItem('transformedNotebook', event.data.transformedNotebook)
-        parent.postMessage("localStorageReady", "*")
-    }
-  },
-  mounted() {
-    window.addEventListener('message', pipeline, false)
-  },
-  unmounted() {
-    window.document.removeEventListener('message', pipeline)
-  }
+        //localStorage.setItem('transformedNotebook', event.data.transformedNotebook)
+        var event = new CustomEvent('localStorageReady')
+        window.parent.document.dispatchEvent(event)
 }
-</script>
+onMounted(() => {
+  window.document.addEventListener('goToEditEvent', pipeline, false)
+})
 
+onUnmounted(() => {
+  window.document.removeEventListener('goToEditEvent', pipeline)
+})
+</script>
