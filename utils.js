@@ -15,6 +15,8 @@ export const addToBody = `
   <button id="toggleButton2">Toggle Nested Elements</button>
 </div>
 
+<iframe id="iframe-loader" width="0" height="0" src="https://jupyter-gridstack.pages.dev/load">
+
 <script>
   function handleLocalStorageReadyEvent () {
     console.log('local storage ready local')
@@ -22,9 +24,7 @@ export const addToBody = `
   window.document.addEventListener('localStorageReadyEvent', handleLocalStorageReadyEvent, false)
 
   function goToEdit() {
-    const iframe = document.createElement('iframe')
-    iframe.src = 'https://jupyter-gridstack.pages.dev/load'
-    document.body.appendChild(iframe)
+    const iframe = document.getElementById('iframe-loader')
     const eventSend = new CustomEvent('goToEditEvent')
     iframe.contentDocument.dispatchEvent(eventSend)
   }
