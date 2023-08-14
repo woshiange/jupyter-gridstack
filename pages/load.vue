@@ -4,6 +4,7 @@
 
 <script setup>
 function pipeline (event) {
+  console.log('serbee')
     /*
         if (!(typeof event.data == 'object' && event.data.call=='sendData')) {
           return
@@ -17,6 +18,7 @@ function pipeline (event) {
         window.parent.document.dispatchEvent(responseEvent)
 }
 onMounted(() => {
+  console.log('hello')
   window.document.addEventListener('message', pipeline, false)
 })
 
