@@ -5,11 +5,10 @@
 <script setup>
 function pipeline (event) {
   console.log('serbee')
-    /*
+  console.log(event)
         if (!(typeof event.data == 'object' && event.data.call=='sendData')) {
           return
         }
-    */
         console.log('1')
         console.log('2')
 
@@ -18,6 +17,7 @@ function pipeline (event) {
 }
 onMounted(() => {
   console.log('hello from load')
+  parent.postMessage("editReady", "*")
   window.addEventListener('message', pipeline)
 })
 
