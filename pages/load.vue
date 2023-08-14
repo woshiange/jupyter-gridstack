@@ -12,8 +12,8 @@ function pipeline (event) {
         console.log('2')
 
         //localStorage.setItem('transformedNotebook', event.data.transformedNotebook)
-        var event = new CustomEvent('localStorageReadyEvent')
-        window.parent.document.dispatchEvent(event)
+        var responseEvent = new CustomEvent('localStorageReadyEvent')
+        window.parent.document.dispatchEvent(responseEvent)
 }
 onMounted(() => {
   window.document.addEventListener('goToEditEvent', pipeline, false)
