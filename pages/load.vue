@@ -18,11 +18,11 @@ function pipeline (event) {
         window.parent.document.dispatchEvent(responseEvent)
 }
 onMounted(() => {
-  console.log('hello')
-  window.document.addEventListener('message', pipeline, false)
+  console.log('hello from load')
+  window.addEventListener('message', pipeline)
 })
 
 onUnmounted(() => {
-  window.document.removeEventListener('message', pipeline)
+  window.removeEventListener('message', pipeline)
 })
 </script>
