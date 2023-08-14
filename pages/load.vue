@@ -4,23 +4,26 @@
 <script>
 export default {
   methods: {
-    addEventSetLocalStorage () {
-      window.addEventListener('message', function(event) {
-        console.log('kurde')
-        console.log(event)
+    pipeline (event) {
+    /*
         if (!(typeof event.data == 'object' && event.data.call=='sendData')) {
           return
         }
+    */
+        if (!(typeof event.type == 'message' && event.data ==='sendData')) {
+          return
+        }
+        console.log('ok')
+
         localStorage.setItem('transformedNotebook', event.data.transformedNotebook)
         parent.postMessage("localStorageReady", "*")
-      }, false)
     }
   },
   mounted() {
-    this.addEventSetLocalStorage()
+    window.addEventListener('message', pipeline, false)
   },
   unmounted() {
-    window.document.removeEventListener('message')
+    window.document.removeEventListener('message', pipeline)
   }
 }
 </script>
