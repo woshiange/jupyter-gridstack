@@ -38,7 +38,7 @@ let editGrid = false
     }
     if(event.type === 'message' && event.data === 'uploadReady') {
       console.log('upload ready')
-      window.location.href = "https://jupyter-gridstack.pages.dev/edit"
+      window.location.href = "https://jupyter-gridstack.pages.dev/load"
     }
   }, false)
 
@@ -51,7 +51,7 @@ let editGrid = false
     }
     const iframe = document.createElement('iframe')
     iframe.id = 'iframeLoader'
-    iframe.src = 'https://jupyter-gridstack.pages.dev/load'
+    iframe.src = 'https://jupyter-gridstack.pages.dev/load-iframe'
     //iframe.src = 'http://localhost:3000/load'
     iframe.width = '0'
     iframe.height = '0'

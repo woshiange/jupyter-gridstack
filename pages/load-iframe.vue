@@ -3,22 +3,24 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
-import { useNotebook } from '@/stores/notebook'
+function handleUpload (event) {
+  if (!(typeof event.data == 'object' && event.data.call=='sendData')) {
+    return
+  }
+  console.log('load')
+  upload(event.data.transformedNotebook)
+  parent.postMessage("uploadReady", "*")
+}
 
-const router = useRouter()
-const notebookStore = useNotebook()
-
-function load () {
+function upload (transformedNotebook) {
   const dbPromise = indexedDB.open('jupyterGrid')
   dbPromise.onupgradeneeded = (event) => {
     const database = event.target.result;
     // Check if the object store exists, and create it if necessary
     if (!database.objectStoreNames.contains('notebooks')) {
-      router.push({ name: 'index' })
+      database.createObjectStore('notebooks')
     }
   };
-
   dbPromise.onsuccess = (event) => {
     const database = event.target.result
     const transaction = database.transaction('notebooks', 'readwrite');
@@ -29,18 +31,20 @@ function load () {
     request.onsuccess = (e) => {
       const existingRecord = e.target.result;
 
-      if (existingRecord === undefined) {
-        router.push({ name: 'index' })
+      if (existingRecord) {
+        // If the record exists, delete it
+        const deleteRequest = objectStore.delete('transformedNotebook');
       }
-
-      notebookStore.transformedNotebookFromEdit =  existingRecord
-      const deleteRequest = objectStore.delete('transformedNotebook');
-      router.push({ name: 'edit' })
     }
+    objectStore.add(transformedNotebook, 'transformedNotebook');
   }
 }
-
 onMounted(() => {
-  load()
+  parent.postMessage("editReady", "*")
+  window.addEventListener('message', handleUpload)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('message', handleUpload)
 })
 </script>
