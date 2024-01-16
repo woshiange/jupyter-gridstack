@@ -88,6 +88,9 @@ function editGrid () {
 }
 
 onMounted(() => {
+  console.log('aaa')
+  console.log(notebookStore.transformedNotebookFromEdit)
+  console.log('bbb')
   if(!notebookStore.notebook && !notebookStore.transformedNotebookFromEdit) {
     router.push({ name: 'index' })
   }
