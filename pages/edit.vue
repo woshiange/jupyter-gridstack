@@ -88,15 +88,15 @@ function editGrid () {
 }
 
 onMounted(() => {
-  if(!notebookStore.notebook) {
+  if(!notebookStore.notebook && !notebookStore.transformedNotebookFromEdit) {
     router.push({ name: 'index' })
   }
   window.document.addEventListener('addToTrashEvent', addToTrash, false)
   window.document.addEventListener('restoreFromTrashEvent', restoreFromTrash, false)
   window.document.addEventListener('downloadEvent', download, false)
 
-  iframeContent.value = notebookStore.transformedNotebook.outerHTML
-  iframeTrashContent.value = notebookStore.trashNotebook.outerHTML
+  iframeContent.value = notebookStore.transformedNotebook
+  iframeTrashContent.value = notebookStore.trashNotebook
   editGrid()
 });
 

@@ -6,6 +6,7 @@ export const useNotebook = defineStore('notebook', {
   getters: {
     transformedNotebook(state) {
       if(state.transformedNotebookFromEdit) {
+	console.log("defined")
         return state.transformedNotebookFromEdit
       }
       const parser = new DOMParser()
