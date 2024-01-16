@@ -12,6 +12,7 @@ function handleUpload (event) {
     return
   }
   console.log('load')
+  console.log(event)
   console.log(event.data.transformedNotebook)
   notebookStore.transformedNotebookFromEdit =  event.data.transformedNotebook
   parent.postMessage("uploadReady", "*")
