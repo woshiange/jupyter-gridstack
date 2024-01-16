@@ -43,14 +43,16 @@ let editGrid = false
   }, false)
 
   function goToEdit() {
+    console.log("go to edit")
+    console.log(editReady)
     if(editReady) {
       sendNotebook()
       return
     }
     const iframe = document.createElement('iframe')
     iframe.id = 'iframeLoader'
-    //iframe.src = 'https://jupyter-gridstack.pages.dev/load'
-    iframe.src = 'http://localhost:3000/load'
+    iframe.src = 'https://jupyter-gridstack.pages.dev/load'
+    //iframe.src = 'http://localhost:3000/load'
     iframe.width = '0'
     iframe.height = '0'
     iframe.frameBorder = '0'
