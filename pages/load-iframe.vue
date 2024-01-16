@@ -39,6 +39,9 @@ function upload (transformedNotebook) {
       console.log('upload done');
       parent.postMessage('uploadReady', '*');
     };
+    transaction.onerror = (error) => {
+      console.error('Transaction error:', error);
+    };
     objectStore.add(transformedNotebook, 'transformedNotebook');
   }
 }
