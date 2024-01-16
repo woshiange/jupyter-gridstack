@@ -89,6 +89,7 @@ function editGrid () {
 
 onMounted(() => {
   console.log('aaa')
+  console.log(notebookStore)
   console.log(notebookStore.transformedNotebookFromEdit)
   console.log('bbb')
   if(!notebookStore.notebook && !notebookStore.transformedNotebookFromEdit) {

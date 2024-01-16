@@ -26,8 +26,7 @@ let editGrid = false
     iframe.contentWindow.postMessage(
       {
         call:'sendData',
-        //transformedNotedbook: originalSourceCode,
-        transformedNotedbook: "sssseeeerrrrbe",
+        transformedNotebook: originalSourceCode,
       }, "*"
     )
   }
@@ -39,7 +38,7 @@ let editGrid = false
     }
     if(event.type === 'message' && event.data === 'uploadReady') {
       console.log('upload ready')
-      //window.location.href = "https://jupyter-gridstack.pages.dev/edit"
+      window.location.href = "https://jupyter-gridstack.pages.dev/edit"
     }
   }, false)
 
