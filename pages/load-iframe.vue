@@ -9,7 +9,6 @@ function handleUpload (event) {
   }
   console.log('load')
   upload(event.data.transformedNotebook)
-  parent.postMessage("uploadReady", "*")
 }
 
 function upload (transformedNotebook) {
@@ -36,8 +35,11 @@ function upload (transformedNotebook) {
         const deleteRequest = objectStore.delete('transformedNotebook');
       }
     }
+    transaction.oncomplete = () => {
+      console.log('upload done');
+      parent.postMessage('uploadReady', '*');
+    };
     objectStore.add(transformedNotebook, 'transformedNotebook');
-    console.log('upload done')
   }
 }
 onMounted(() => {
