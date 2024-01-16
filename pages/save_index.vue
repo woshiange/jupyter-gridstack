@@ -38,7 +38,6 @@
 
 <script scoped>
 import { addToBody, mainScript } from '@/utils.js'
-import { mapStores } from 'pinia'
 export default {
   data() {
     return {
@@ -56,7 +55,13 @@ export default {
     fileExtension() {
       return this.file.name.split('.').at(-1).toLowerCase()
     },
-    ...mapStores(useNotebook)
+    notebookTransformed() {
+      if(!self.fileContent) {
+        return
+      }
+
+document.getElementsByTagName('head')[0].appendChild(link);
+    }
   },
   methods: {
     onChange() {
@@ -89,7 +94,32 @@ export default {
       const rootElement = htmlDocument.documentElement;
       return rootElement
     },
-    savegetTrashNotebook () {
+    getTransformedNotebook () {
+      const parser = new DOMParser();
+
+// Step 2: Parse the string variable as an XML document
+      const htmlDocument = parser.parseFromString(this.fileContent, 'text/html');
+
+// Step 3: Extract the document element (root) from the parsed XML document
+      const rootElement = htmlDocument.documentElement;
+      const link = document.createElement('link');
+      link.href = 'https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css'
+      link.rel = 'stylesheet'
+      //rootElement.getElementsByTagName('head')[0].appendChild(link);
+      const script = document.createElement('script')
+      script.src = 'https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js'
+      const scriptSelf = document.createElement('script')
+      scriptSelf.src = 'http://0.0.0.0:8000/zlatko.js'
+      scriptSelf.defer = true
+      //rootElement.getElementsByTagName('head')[0].appendChild(script);
+      const referenceNode = rootElement.querySelector('meta[name="viewport"]')
+      referenceNode.parentNode.insertBefore(scriptSelf, referenceNode.nextSibling)
+      referenceNode.parentNode.insertBefore(script, referenceNode.nextSibling)
+      referenceNode.parentNode.insertBefore(link, referenceNode.nextSibling)
+      //rootElement.getElementsByTagName('head')[0].append(link, script);
+      return rootElement
+    },
+    getTrashNotebook () {
       const parser = new DOMParser();
 
 // Step 2: Parse the string variable as an XML document
@@ -117,7 +147,6 @@ export default {
   },
   watch: {
     file() {
-      console.log('file')
       const reader = new FileReader()
       reader.onload = () => {
         if(this.fileExtension === 'ipynb') {
@@ -131,8 +160,9 @@ export default {
       reader.readAsText(this.file)
     },
     fileContent() {
-      console.log("fileContent")
-      this.notebookStore.notebook = this.getNotebook().outerHTML
+      localStorage.setItem('notebook', this.getNotebook().outerHTML)
+      localStorage.setItem('transformedNotebook', this.getTransformedNotebook().outerHTML)
+      localStorage.setItem('trashNotebook', this.getTrashNotebook().outerHTML)
       this.$router.push({ name: 'edit' })
     }
   }

@@ -183,7 +183,7 @@ function cleanEl(el) {
       el.removeAttribute(attributeName)
     }
   })
-  var toRemove = el.getElementsByClassName('nested')[0]
+  var toRemove = el.getElementsByClassName('top-right')[0]
   toRemove.remove()
   var itemContent = el.getElementsByClassName('grid-stack-item-content')[0]
   var close = document.createElement('div')

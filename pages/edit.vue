@@ -28,26 +28,31 @@
 
 <script setup>
 import { addToBody, mainScript } from '@/utils.js'
+import { useNotebook } from '@/stores/notebook'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 const drawer = ref(false)
 const iframeContent = ref('')
 const iframeTrashContent = ref('')
+const notebookStore = useNotebook()
 
 
 function addToTrash (event) {
   const el = event.detail
-  const eventSend = new CustomEvent('addToTrashEvent', { detail: el })
+  const eventSend = new CustomEvent('restoreEvent', { detail: el })
   const trashIframe = document.getElementById("trash-iframe")
   trashIframe.contentDocument.dispatchEvent(eventSend)
 }
 
-function restore (event) {
+function restoreFromTrash (event) {
   const el = event.detail
   const eventSend = new CustomEvent('restoreEvent', { detail: el })
   const mainIframe = document.getElementById("main-iframe")
   mainIframe.contentDocument.dispatchEvent(eventSend)
 }
 
-function savedData (event) {
+function download (event) {
   const savedData = event.detail
   for (var i = 0; i < savedData.length; i++) {
     if (!savedData[i].hasOwnProperty("h")) {
@@ -57,7 +62,16 @@ function savedData (event) {
       savedData[i].w = 1
     }
   }
-  setNewTransformedNotebook(savedData)
+  const downloadNotebook = notebookStore.downloadNotebook(savedData).outerHTML
+
+  // Download the file
+  var blob = new Blob([downloadNotebook], { type: 'text/html' })
+  var blobUrl = URL.createObjectURL(blob)
+  var downloadLink = document.createElement('a')
+  downloadLink.href = blobUrl
+  downloadLink.download = 'downloaded.html'
+  downloadLink.click()
+  URL.revokeObjectURL(blobUrl)
 }
 
 function save () {
@@ -73,71 +87,23 @@ function editGrid () {
   mainIframe.contentDocument.dispatchEvent(eventSend)
 }
 
-function setNewTransformedNotebook (savedData) {
-  const notebookHtml = localStorage.getItem('notebook');
-  const parser = new DOMParser();
-
-  const htmlDocument = parser.parseFromString(notebookHtml, 'text/html');
-
-  const rootElement = htmlDocument.documentElement;
-  const link = document.createElement('link');
-  link.href = 'https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css'
-  link.rel = 'stylesheet'
-  //rootElement.getElementsByTagName('head')[0].appendChild(link);
-  const script = document.createElement('script')
-  script.src = 'https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js'
-  //rootElement.getElementsByTagName('head')[0].appendChild(script);
-  const referenceNode = rootElement.querySelector('meta[name="viewport"]')
-  referenceNode.parentNode.insertBefore(script, referenceNode.nextSibling)
-  referenceNode.parentNode.insertBefore(link, referenceNode.nextSibling)
-  //rootElement.getElementsByTagName('head')[0].append(link, script);
-  rootElement.getElementsByTagName('body')[0].innerHTML += `<script>var edit = false<\/script>`
-  rootElement.getElementsByTagName('body')[0].innerHTML += addToBody
-  const scriptSavedData = document.createElement('script')
-  scriptSavedData.type = 'text/javascript'
-  var jsCode = `var savedData = ${JSON.stringify(savedData)}`
-  scriptSavedData.textContent = jsCode
-  rootElement.getElementsByTagName('body')[0].appendChild(scriptSavedData)
-  const scriptBody = document.createElement('script')
-  scriptBody.defer = true
-  scriptBody.textContent = mainScript
-  scriptBody.type = 'module'
-  rootElement.getElementsByTagName('body')[0].appendChild(scriptBody);
-  localStorage.setItem('transformedNotebook', rootElement.outerHTML)
-
-  // Download the file
-  var blob = new Blob([rootElement.outerHTML], { type: 'text/html' })
-  var blobUrl = URL.createObjectURL(blob)
-  var downloadLink = document.createElement('a')
-  downloadLink.href = blobUrl
-  downloadLink.download = 'downloaded.html'
-  downloadLink.click()
-  URL.revokeObjectURL(blobUrl)
-}
-
 onMounted(() => {
-  // Load the HTML content from localStorage when the component is mounted
-  const transformedNotebookHtml = localStorage.getItem('transformedNotebook');
-  const trashNotebookHtml = localStorage.getItem('trashNotebook');
+  if(!notebookStore.notebook) {
+    router.push({ name: 'index' })
+  }
   window.document.addEventListener('addToTrashEvent', addToTrash, false)
-  window.document.addEventListener('restoreEvent', restore, false)
-  window.document.addEventListener('savedDataEvent', savedData, false)
+  window.document.addEventListener('restoreFromTrashEvent', restoreFromTrash, false)
+  window.document.addEventListener('downloadEvent', download, false)
 
-  // Check if the content is available, and set it to the iframeContent
-  if (transformedNotebookHtml) {
-    iframeContent.value = transformedNotebookHtml;
-    editGrid()
-  }
-  if (trashNotebookHtml) {
-    //console.log(trashNotebookHtml)
-    iframeTrashContent.value = trashNotebookHtml;
-  }
+  iframeContent.value = notebookStore.transformedNotebook.outerHTML
+  iframeTrashContent.value = notebookStore.trashNotebook.outerHTML
+  editGrid()
 });
 
 onUnmounted(() => {
   window.document.removeEventListener('addToTrashEvent', addToTrash)
-  window.document.removeEventListener('restoreEvent', restore)
-  window.document.removeEventListener('savedDataEvent', savedData)
+  window.document.removeEventListener('restoreFromTrashEvent', restoreFromTrash)
+  window.document.removeEventListener('downloadEvent', download)
 })
 </script>
 
