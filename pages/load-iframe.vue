@@ -37,6 +37,7 @@ function upload (transformedNotebook) {
       }
     }
     objectStore.add(transformedNotebook, 'transformedNotebook');
+    console.log('upload done')
   }
 }
 onMounted(() => {

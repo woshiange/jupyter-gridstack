@@ -38,7 +38,7 @@ let editGrid = false
     }
     if(event.type === 'message' && event.data === 'uploadReady') {
       console.log('upload ready')
-      window.location.href = "https://jupyter-gridstack.pages.dev/load"
+      //window.location.href = "https://jupyter-gridstack.pages.dev/load"
     }
   }, false)
 
