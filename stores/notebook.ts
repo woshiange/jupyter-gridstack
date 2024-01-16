@@ -1,9 +1,13 @@
 export const useNotebook = defineStore('notebook', {
   state: () => ({
     notebook: null,
+    transformedNotebookFromEdit: null
   }),
   getters: {
     transformedNotebook(state) {
+      if(state.transformedNotebookFromEdit) {
+        return state.transformedNotebookFromEdit
+      }
       const parser = new DOMParser()
       const htmlDocument = parser.parseFromString(state.notebook, 'text/html');
       const rootElement = htmlDocument.documentElement;
@@ -23,9 +27,12 @@ export const useNotebook = defineStore('notebook', {
       scriptEdit.textContent = "var edit = true"
       var bodyElement = rootElement.getElementsByTagName('body')[0]
       bodyElement.insertBefore(scriptEdit, bodyElement.firstChild)
-      return rootElement
+      return rootElement.outerHTML
     },
     trashNotebook(state) {
+      if(state.transformedNotebookFromEdit) {
+        return state.transformedNotebookFromEdit
+      }
       const parser = new DOMParser();
       const htmlDocument = parser.parseFromString(state.notebook, 'text/html');
       const rootElement = htmlDocument.documentElement;
@@ -45,7 +52,7 @@ export const useNotebook = defineStore('notebook', {
       scriptTrash.textContent = "var trashMark = true"
       var bodyElement = rootElement.getElementsByTagName('body')[0]
       bodyElement.insertBefore(scriptTrash, bodyElement.firstChild)
-      return rootElement
+      return rootElement.outerHTML
     },
     downloadNotebook(state) {
       return function (savedData) {

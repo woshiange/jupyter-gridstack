@@ -15,6 +15,7 @@ let editGrid = false
 */
   //const savedData = [{id: 0, x:2, y:0, w: 6, h: 3}]
   const cells = []
+  var originalSourceCode = ""
   const resizedDone = []
   const isTrash = typeof trashMark !== 'undefined'
   console.log("isTrash")
@@ -25,7 +26,7 @@ let editGrid = false
     iframe.contentWindow.postMessage(
       {
         call:'sendData',
-        transformedNotedbook: 'hello serbe',
+        transformedNotedbook: originalSourceCode,
       }, "*"
     )
   }
@@ -560,6 +561,7 @@ function resume() {
 //createApp().mount()
 
 function init() {
+  originalSourceCode = document.documentElement.outerHTML
   grid = start()
   addResizes()
   //resume()
