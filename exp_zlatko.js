@@ -90,11 +90,13 @@ body {
   margin: 0 !important;
   padding: 0 !important;
 }
+.result-container {
+  position: relative;
+}
 .top-right {
   position: absolute;
   top: -5px;
   right: 5px;
-  z-index: 3;
 }
 .app-bar {
   display: flex;
@@ -121,15 +123,9 @@ body {
   box-shadow: 0px 1px 3px rgb(0 0 0 / 13%);
 }
 #drawer {
-  position: fixed;
-  top: 40px;
-  left: -300px;
-  width: 300px;
-  height: 100%;
+  width: 100%;
+  height: 200px;
   background-color: #f0f0f0;
-  transition: left 0.3s ease;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  z-index: 998;
 }
 #drawer ul {
   list-style: none;
@@ -162,21 +158,6 @@ body {
 #notebookIframe {
   height: 100%;
   width: 100%;
-}
-.overlay-card {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0);
-  z-index: 1;
-}
-.grid-stack-item {
-  position: relative;
-}
-.grid-stack-main .overlay-card {
-  cursor: grab;
 }
 `
 var styleSheet = document.createElement("style")
@@ -383,18 +364,17 @@ function start() {
         <iframe id="notebookIframe" frameborder="0"></iframe>
       </div>
     `
-    document.body.insertAdjacentHTML('beforeend', htmlString)
+    parser = new DOMParser()
+    doc = parser.parseFromString(htmlString, 'text/html') 
+    document.body.appendChild(doc.body)
 
 
     var gridDef = {
       minRow: 1,
       cellHeight: '100px',
-      animate: false,
-      columnOpts: {
-	breakpointForWindow: true,
-        breakpoints: [{w:600, c:1}]
-      }
+      acceptWidgets: true
     }
+	/*
     var gridTrashDef = {
       margin: 2,
       cellHeight: '70px',
@@ -402,27 +382,16 @@ function start() {
       disableDrag: true,
       disableResize: true
     }
+    */
+    var gridTrashDef = {
+      margin: 2,
+      minRow: 1,
+      cellHeight: '100px',
+      acceptWidgets: true
+    }
     
     grid = GridStack.init(gridDef, '.grid-stack-main')
     gridTrash = GridStack.init(gridTrashDef, '.grid-stack-trash')
-
-      if (typeof savedData !== 'undefined') {
-        savedData.forEach(function(item) {
-	  item.content = cells.find(element => element.id === item.id).content
-        })
-        grid.load(savedData)
-      } else {
-        grid.load(cells)
-      }
-
-      var trashCells = []
-      if (typeof savedData !== 'undefined') {
-        trashCells = cells.filter(item => !savedData.some(f => f.id === item.id))
-      } else {
-        trashCells = []
-      }
-      gridTrash.load(trashCells)
-	/*
     if (!isTrash) {
       if (typeof savedData !== 'undefined') {
         savedData.forEach(function(item) {
@@ -443,22 +412,21 @@ function start() {
       }
       grid.load(trashCells)
     }
-    */
     
 	/*
       grid.on('removed', function(event, items) {
 	const functionToRun = !isTrash ? addToTrash : restoreFromTrash
         items.forEach(function(item) {
+		console.log('removed from main')
           gridTrash.addWidget({content: item.content, x:0, y: 0, w: 6, h:3})
         })
       })
       gridTrash.on('removed', function(event, items) {
         items.forEach(function(item) {
+		console.log('removed from trash')
           grid.addWidget({content: item.content, x:0, y: 0, w: 6, h:3})
         })
       })
-      */
-	/*
       gridTrash.on('added', function(event, items) {
         var htmlString = ` 
           <div class="top-right">
@@ -564,8 +532,12 @@ function observePlotly(element) {
 
 let resizeVegaObserver = new ResizeObserver(entries => {
   for (let entry of entries) {
+    console.log('resize vega')
     var vegaEl = entry.target.querySelector('div').querySelector('div')
     var scriptStr = resizeVega(vegaEl)
+    console.log('aaa')
+    console.log(vegaEl)
+    console.log('bbbb')
     eval(scriptStr)
   }
 });
@@ -736,72 +708,75 @@ document.addEventListener('DOMContentLoaded', function() {
 })
 
 
+function cleanEl(el) {
+  var toRemove = el.getElementsByClassName('top-right')[0]
+  toRemove.remove()
+  var t = ` 
+    <div class="top-right">
+      <button onclick="console.log(this.parentElement.parentElement)">Remove Me</button>
+    </div>
+  `
+  var parser = new DOMParser()
+  var doc = parser.parseFromString(t, 'text/html') 
+  var bodyElement = doc.body
+  el.appendChild(bodyElement.firstChild)
+}
 
 function addEditStyle() {
-  addCardEditStyle()
+  addTrashAction()
   addGridEditStyle(grid)
 }
 
 function removeEditStyle() {
-  removeCardEditStyle()
+  removeTrashAction()
   removeGridEditStyle()
 }
 
-function addCardEditStyle() {
-  var htmlTopRight = ` 
+function addTrashAction() {
+  var htmlString = ` 
     <div class="top-right">
       <button onclick="switchGrid(this.parentElement.parentElement)">Remove Me</button>
     </div>
   `
-  var htmlOverlayCard = ` 
-    <div class="overlay-card"></div>
-  `
+  var parser = new DOMParser()
   var gridStackItems = document.querySelectorAll('.grid-stack-item')
-  var gridStackItemContents = document.querySelectorAll('.grid-stack-item-content')
   gridStackItems.forEach(function(el) {
-    var stringToAdd
-    if(el.parentElement.classList.contains('grid-stack-trash')) {
-      stringToAdd = htmlTopRight.replace("Remove Me", "Restore Me")
-    }
-    else stringToAdd = htmlTopRight
-    el.insertAdjacentHTML('beforeend', stringToAdd)
-  })
-  gridStackItemContents.forEach(function(el) {
-    el.insertAdjacentHTML('beforeend', htmlOverlayCard)
+    var doc = parser.parseFromString(htmlString, 'text/html') 
+    var bodyElement = doc.body
+    el.appendChild(bodyElement.firstChild)
   })
 }
 
 function switchGrid(el) {
-  var currentGrid
-  var nextGrid
-  var switchButton = el.querySelector('.top-right').querySelector('button')
-  el.setAttribute('gs-x', '0')
-  el.setAttribute('gs-y', '0')
-  el.setAttribute('gs-w', '6')
-  el.setAttribute('gs-h', '3')
-  if(el.parentElement.classList.contains('grid-stack-main')) {
-    currentGrid = grid
-    nextGrid = gridTrash
-    switchButton.textContent = "Restore Me"
-  } else {
-    currentGrid = gridTrash
-    nextGrid = grid
-    switchButton.textContent = "Remove Me"
-  }
-  currentGrid.removeWidget(el)
-  nextGrid.addWidget(el)
+  console.log('aaaaaaaaaaaaaaa')
+  //console.log(el)
+  grid.removeWidget(el)
+  gridTrash.addWidget(el)
 }
-
-function removeCardEditStyle() {
+function removeTrashAction() {
   document.querySelectorAll('.top-right').forEach(function (element) {
     element.remove()
   })
-  document.querySelectorAll('.overlay-card').forEach(function (element) {
-    element.remove()
-  })
 }
 
+window.document.addEventListener('restoreEvent', handleRestoreEvent, false)
+window.document.addEventListener('saveEvent', handleSaveEvent, false)
 
+function handleRestoreEvent(event) {
+  var el = event.detail
+  cleanEl(el)
+  grid.addWidget(el, {x:0, y: 0, w: 6, h:3})
+  addResize(el.querySelector('div').querySelector('div'))
+}
+
+function handleSaveEvent(event) {
+  var savedData = grid.save()
+  savedData.forEach(object => {
+    delete object['content'];
+  })
+  var event = new CustomEvent('downloadEvent', { detail: savedData })
+  window.parent.document.dispatchEvent(event)
+}
 
 function saveToIndexedDb (transformedNotebook) {
   var parser = new DOMParser()
@@ -949,18 +924,21 @@ function addHtml() {
 	  downloadBtn.style.display = 'none'
 	  viewNotebookBtn.style.display = 'none'
 	}
+        //drawer.style.left = '0';
 
+	/*
         toggleBtn.addEventListener('click', function () {
             var currentLeft = parseInt(getComputedStyle(drawer).left)
 
             if (currentLeft < 0) {
                 drawer.style.left = '0';
-                overlay.style.display = 'block';
+                //overlay.style.display = 'block';
             } else {
                 drawer.style.left = '-300px';
-                overlay.style.display = 'none';
+                //overlay.style.display = 'none';
             }
         });
+	*/
         editBtn.addEventListener('click', function () {
           edit = !edit
           if (edit) {
@@ -998,12 +976,14 @@ function addHtml() {
 	  download()
         });
 
+	/*
         document.addEventListener('click', function (event) {
             //var drawer = document.getElementById('drawer');
             // Close the drawer if the click is outside the drawer and the drawer is open
             if (event.target !== toggleBtn && !drawer.contains(event.target) && parseInt(getComputedStyle(drawer).left) === 0) {
                 drawer.style.left = '-300px';
-                overlay.style.display = 'none';
+                //overlay.style.display = 'none';
             }
         });
+	*/
 }
