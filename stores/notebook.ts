@@ -15,6 +15,7 @@ export const useNotebook = defineStore('notebook', {
       script.src = 'https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js'
       const scriptSelf = document.createElement('script')
       scriptSelf.src = 'https://jupyter-gridstack.pages.dev/1.0/zlatko.js'
+      //scriptSelf.src = 'http://localhost:3000/1.0/zlatko.js'
       scriptSelf.defer = true
       const scriptIconify = document.createElement('script')
       scriptIconify.src = 'https://code.iconify.design/1/1.0.6/iconify.min.js'
@@ -33,6 +34,10 @@ export const useNotebook = defineStore('notebook', {
       const scriptFileName= document.createElement('script')
       scriptFileName.textContent = `var fileName = '${state.fileName}'`
       bodyElement.insertBefore(scriptFileName, bodyElement.firstChild)
+      const scriptEncodedNotebook = document.createElement('script')
+      const encodedNotebook = btoa(unescape(encodeURIComponent(state.notebook)))
+      scriptEncodedNotebook.textContent = `var encodedNotebook = '${encodedNotebook}'`
+      bodyElement.appendChild(scriptEncodedNotebook)
       const scripts = htmlDocument.getElementsByTagName('script')
       for (const currentScript of scripts) {
         const scriptContent = currentScript.textContent

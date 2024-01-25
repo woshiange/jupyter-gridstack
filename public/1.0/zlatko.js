@@ -583,7 +583,8 @@ function resizeVega(vegaEl) {
 
 
 function init() {
-  saveToIndexedDb(document.documentElement.outerHTML)
+  //saveToIndexedDb(document.documentElement.outerHTML)
+  saveToIndexedDb()
   addHtml()
   grid = start()
   addResizes()
@@ -680,29 +681,8 @@ function removeCardEditStyle() {
 
 
 
-function saveToIndexedDb (transformedNotebook) {
-  var parser = new DOMParser()
-  var doc = parser.parseFromString(transformedNotebook, 'text/html')
-  var scriptToRemove = doc.querySelector('script[src="https://jupyter-gridstack.pages.dev/1.0/zlatko.js"]')
-  scriptToRemove.parentNode.removeChild(scriptToRemove)
-  scriptToRemove = Array.from(doc.querySelectorAll('script')).find(
-	  script => script.textContent.trim().startsWith('var edit =')
-  	)
-  scriptToRemove.parentNode.removeChild(scriptToRemove)
-  scriptToRemove = Array.from(doc.querySelectorAll('script')).find(
-	  script => script.textContent.trim().startsWith('var savedData =')
-  	)
-  if (scriptToRemove) {
-    scriptToRemove.parentNode.removeChild(scriptToRemove)
-  }
-  scriptToRemove = Array.from(doc.querySelectorAll('script')).find(
-	  script => script.textContent.trim().startsWith('var fromWebsite =')
-  	)
-  if (scriptToRemove) {
-    scriptToRemove.parentNode.removeChild(scriptToRemove)
-  }
-  //var notebook = new XMLSerializer().serializeToString(doc)
-  var notebook = doc.documentElement.outerHTML
+function saveToIndexedDb () {
+  const notebook = decodeURIComponent(escape(window.atob(encodedNotebook)))
   const dbPromise = indexedDB.open('jupyterGrid')
   dbPromise.onupgradeneeded = (event) => {
     const database = event.target.result;
@@ -742,21 +722,35 @@ function download() {
       const parser = new DOMParser()
       const htmlDocument = parser.parseFromString(notebook, 'text/html')
       const rootElement = htmlDocument.documentElement
+      const link = document.createElement('link');
+      link.href = 'https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css'
+      link.rel = 'stylesheet'
+      const script = document.createElement('script')
+      script.src = 'https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js'
       const scriptSelf = document.createElement('script')
       scriptSelf.src = 'https://jupyter-gridstack.pages.dev/1.0/zlatko.js'
+      //scriptSelf.src = 'http://localhost:3000/1.0/zlatko.js'
       scriptSelf.defer = true
+      const scriptIconify = document.createElement('script')
+      scriptIconify.src = 'https://code.iconify.design/1/1.0.6/iconify.min.js'
       const referenceNode = rootElement.querySelector('meta[name="viewport"]')
-      console.log('refenceNode')
-      console.log(referenceNode)
+      referenceNode.parentNode.insertBefore(scriptIconify, referenceNode.nextSibling)
       referenceNode.parentNode.insertBefore(scriptSelf, referenceNode.nextSibling)
+      referenceNode.parentNode.insertBefore(script, referenceNode.nextSibling)
+      referenceNode.parentNode.insertBefore(link, referenceNode.nextSibling)
       const scriptSavedData = document.createElement('script')
       scriptSavedData.textContent = "var savedData = " + JSON.stringify(getSavedData())
       var bodyElement = rootElement.getElementsByTagName('body')[0]
       bodyElement.insertBefore(scriptSavedData, bodyElement.firstChild)
+      const scriptFileName= document.createElement('script')
+      scriptFileName.textContent = `var fileName = '${fileName}'`
+      bodyElement.insertBefore(scriptFileName, bodyElement.firstChild)
       const scriptEdit = document.createElement('script')
       scriptEdit.textContent = "var edit = false"
       bodyElement.insertBefore(scriptEdit, bodyElement.firstChild)
-      console.log('download download')
+      const scriptEncodedNotebook = document.createElement('script')
+      scriptEncodedNotebook.textContent = `var encodedNotebook = '${encodedNotebook}'`
+      bodyElement.appendChild(scriptEncodedNotebook)
 
       var blob = new Blob([rootElement.outerHTML], { type: 'text/html' })
       //var blob = new Blob([doc.body.firstChild.outerHTML], { type: 'text/html' })
@@ -787,19 +781,6 @@ function populateNotebookIframe() {
   }
 }
 
-
-function addAppBar() {
-  var htmlString = ` 
-    <div class="app-bar">
-      <button onclick = "goToEdit()">Toggle Nested Elements</button>
-      <button id="toggleButton2">Toggle Nested Elements</button>
-    </div>
-  `
-  var parser = new DOMParser()
-  var doc = parser.parseFromString(htmlString, 'text/html') 
-  var bodyElement = doc.body
-  document.body.insertBefore(bodyElement.firstChild, document.body.firstChild)
-}
 
 
 function addHtml() {
