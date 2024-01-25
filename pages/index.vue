@@ -133,6 +133,7 @@ export default {
     fileContent() {
       console.log("fileContent")
       this.notebookStore.notebook = this.getNotebook().outerHTML
+      this.notebookStore.fileName = this.fileName
       this.$router.push({ name: 'edit' })
     }
   }

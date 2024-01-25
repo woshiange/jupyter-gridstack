@@ -12,7 +12,6 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const iframeContent = ref('')
-const iframeTrashContent = ref('')
 const notebookStore = useNotebook()
 
 
@@ -21,7 +20,6 @@ onMounted(() => {
     router.push({ name: 'index' })
   }
   iframeContent.value = notebookStore.transformedNotebook
-  iframeTrashContent.value = notebookStore.trashNotebook
 });
 
 </script>
