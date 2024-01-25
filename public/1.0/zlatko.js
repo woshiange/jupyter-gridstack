@@ -683,7 +683,7 @@ function removeCardEditStyle() {
 function saveToIndexedDb (transformedNotebook) {
   var parser = new DOMParser()
   var doc = parser.parseFromString(transformedNotebook, 'text/html')
-  var scriptToRemove = doc.querySelector('script[src="https://jupyter-gridstack.pages.dev/1.0/zlatko.js"]')
+  var scriptToRemove = doc.querySelector('script[src="http://0.0.0.0:8000/zlatko.js"]')
   scriptToRemove.parentNode.removeChild(scriptToRemove)
   scriptToRemove = Array.from(doc.querySelectorAll('script')).find(
 	  script => script.textContent.trim().startsWith('var edit =')
@@ -743,7 +743,7 @@ function download() {
       const htmlDocument = parser.parseFromString(notebook, 'text/html')
       const rootElement = htmlDocument.documentElement
       const scriptSelf = document.createElement('script')
-      scriptSelf.src = 'https://jupyter-gridstack.pages.dev/1.0/zlatko.js'
+      scriptSelf.src = 'http://0.0.0.0:8000/zlatko.js'
       scriptSelf.defer = true
       const referenceNode = rootElement.querySelector('meta[name="viewport"]')
       console.log('refenceNode')
