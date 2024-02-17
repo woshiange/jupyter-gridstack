@@ -4,7 +4,7 @@ export const useNotebook = defineStore('notebook', {
     fileName: null
   }),
   getters: {
-    transformedNotebook(state) {
+    savetransformedNotebook(state) {
       const parser = new DOMParser()
       const htmlDocument = parser.parseFromString(state.notebook, 'text/html');
       const rootElement = htmlDocument.documentElement;
@@ -14,8 +14,8 @@ export const useNotebook = defineStore('notebook', {
       const script = document.createElement('script')
       script.src = 'https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js'
       const scriptSelf = document.createElement('script')
-      scriptSelf.src = 'https://jupyter-gridstack.pages.dev/2.0/zlatko.js'
-      //scriptSelf.src = 'http://localhost:3000/1.0/zlatko.js'
+      //scriptSelf.src = 'https://jupyter-gridstack.pages.dev/2.0/zlatko.js'
+      scriptSelf.src = 'http://localhost:3000/2.0/zlatko.js'
       scriptSelf.defer = true
       const scriptIconify = document.createElement('script')
       scriptIconify.src = 'https://code.iconify.design/1/1.0.6/iconify.min.js'
@@ -52,6 +52,48 @@ export const useNotebook = defineStore('notebook', {
 	}
       }
       return rootElement.outerHTML
+    },
+    transformedNotebook(state) {
+      const parser = new DOMParser()
+      const htmlDocument = parser.parseFromString(state.notebook, 'text/html');
+      const rootElement = htmlDocument.documentElement;
+      const scripts = htmlDocument.getElementsByTagName('script')
+      for (const currentScript of scripts) {
+        const scriptContent = currentScript.textContent
+	if (scriptContent.includes('require.config')) {
+	  if (!scriptContent.includes('waitSeconds')) {
+            const modifiedScriptContent = scriptContent.replace(
+		    /require\.config\({/,
+		    'require.config({\n    waitSeconds: 30,'
+	    )
+	    currentScript.textContent = modifiedScriptContent
+	  }
+	}
+      }
+      const encodedNotebook = btoa(unescape(encodeURIComponent(rootElement.outerHTML)))
+      const template = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Your Title Here</title>
+	<link href="https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet">
+	<script src="https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js"></script>
+	<script src="https://code.iconify.design/1/1.0.6/iconify.min.js"></script>
+	<script src="http://localhost:3000/2.0/zlatko.js" defer=""></script>
+      </head>
+      <body>
+        <script>
+	  var edit=true
+	  var fromWebsite = true
+          var fileName = '${state.fileName}'
+          var encodedNotebook = '${encodedNotebook}'
+        </script>
+      </body>
+      </html>
+      `
+      return template
     },
   }
 })

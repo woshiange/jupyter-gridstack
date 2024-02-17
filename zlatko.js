@@ -344,13 +344,17 @@ class Cell {
   }
 }
 
-function start() {
+async function start() {
     addCss()
 
-    var result = document.createElement('div');
-    result.classList.add('grid-stack')
+    //var result = document.createElement('div');
+    //result.classList.add('grid-stack')
 
-    const cellsDom = document.querySelectorAll('.jp-Cell')
+    const notebook = await getNotebook()
+    const parser = new DOMParser()
+    const notebookHtml = parser.parseFromString(notebook, 'text/html')
+
+    const cellsDom = notebookHtml.querySelectorAll('.jp-Cell')
     var id = 0
     for(var i = 0; i < cellsDom.length; i++) {
       var cell = new Cell(cellsDom[i])
@@ -367,6 +371,9 @@ function start() {
         element.remove();
       });
 
+    body.inerHTML = ''
+    addHtml()
+    console.log('malamine malamine')
     var result = document.createElement('div');
     result.classList.add('grid-stack-main')
     result.setAttribute('v-scope', '')
@@ -584,7 +591,6 @@ function resizeVega(vegaEl) {
 
 function init() {
   saveToIndexedDb(document.documentElement.outerHTML)
-  addHtml()
   grid = start()
   addResizes()
   addJs()
@@ -843,6 +849,24 @@ function addHtml() {
     </div>
   `
   document.body.insertAdjacentHTML('afterbegin', htmlString)
+}
+
+function getNotebook() {
+  return new Promise((resolve, reject) => {
+    const dbPromise = indexedDB.open('jupyterGrid')
+
+    dbPromise.onsuccess = (event) => {
+      const database = event.target.result
+      const transaction = database.transaction('notebooks', 'readwrite');
+      const objectStore = transaction.objectStore('notebooks');
+
+      const request = objectStore.get('notebook');
+      request.onsuccess = (e) => {
+        const notebook = e.target.result
+        resolve(notebook)
+      }
+    }
+  })
 }
 
 function addJs() {

@@ -188,6 +188,13 @@ body.drawer-open {
 #editBtn {
   margin-left: 30px
 }
+.jp-RenderedHTMLCommon {
+  padding: 0 !important;
+}
+.parent-of-default-cell {
+  display: flex;
+  align-items: center;
+}
 `
 var styleSheet = document.createElement("style")
 styleSheet.innerText = styles
@@ -284,8 +291,18 @@ class Cell {
       //div.append(document.querySelectorAll('[data-root-id]')[0])
       //div.append(document.querySelector('script'))
       //div.innerHTML = this.bokehEl.innerHTML
-      var bokehScript = getElementByXpath("//script[contains(text(), 'root.Bokeh.embed')]", this.dom).innerHTML
-      var lines = bokehScript.split("\n")
+      var bokehScript
+      var bokehScriptContent
+      //var bokehScript = getElementByXpath("//script[contains(text(), 'root.Bokeh.embed')]", this.dom).innerHTML
+      //var scripts = this.dom.getElementsByTagName('script')
+      var scripts = this.el.getElementsByTagName('script')
+      for (var i = 0; i < scripts.length; i++) {
+        var script = scripts[i];
+        if (script.textContent.indexOf('root.Bokeh.embed') !== -1) {
+          bokehScript = script
+        }
+      }
+      var lines = bokehScript.textContent.split("\n")
       let dataJson
       for (let i = 0; i < lines.length; i++) {
         if(lines[i].includes('const docs_json =')) {
@@ -299,7 +316,7 @@ class Cell {
 	for (let i = 0; i < dataBokehRoots.length; i++) {
           dataBokehRoots[i]["attributes"]["sizing_mode"] = "stretch_both"
         }
-        bokehScript = bokehScript.replace(dataJson, JSON.stringify(dataBokeh)) 
+        bokehScriptContent = bokehScript.textContent.replace(dataJson, JSON.stringify(dataBokeh)) 
 	let renderJson
         for (let i = 0; i < lines.length; i++) {
           if(lines[i].includes('const render_items =')) {
@@ -310,47 +327,179 @@ class Cell {
         let renderBokeh = JSON.parse(renderJson)
 	let renderId = Object.keys(renderBokeh[0]['roots'])[0]
 	let divId = renderBokeh[0]['roots'][renderId]
-	let newDivId = divId + "-new"
-	renderBokeh[0]['roots'][renderId] = newDivId
-        bokehScript = bokehScript.replace(renderJson, JSON.stringify(renderBokeh)) 
-
+        bokehScriptContent = bokehScriptContent.replace('if (attempts > 100)', 'if (attempts > 1000)')
+        bokehScript.textContent = bokehScriptContent
+        //bokehScript = 'setTimeout(function() { ' + bokehScript + ' }, 0)'
 	const newDiv = document.createElement('div')
 	newDiv.setAttribute('data-root-id', renderId)
-	newDiv.setAttribute('id', newDivId)
+	newDiv.setAttribute('id', divId)
 	newDiv.style.display = 'contents'
 
         div.append(newDiv)
 
-        var lines = bokehScript.split("\n")
-	if (lines[0].startsWith('var element = document.getElementById')) {
-	  lines.shift()
-	  bokehScript = lines.join('\n')
-        }
-        var script = document.createElement('script')
-        script.appendChild(document.createTextNode(bokehScript))
-        document.body.appendChild(script)
+        //var script = document.createElement('script')
+        //script.appendChild(document.createTextNode(bokehScript))
+        //document.body.appendChild(script)
+        //div.appendChild(script)
       } else {
-        div.appendChild(this.el)
+        console.log('not found!!!!!!!!')
+        div.appendChild(this.el.cloneNode(true))
       }
     } else {
       const newDiv = document.createElement('div')
       newDiv.classList.add('default-cell')
-      newDiv.appendChild(this.el)
+      newDiv.appendChild(this.el.cloneNode(true))
       div.appendChild(newDiv)
     }
     
     
+    //loadScripts(this.dom)
     return div.innerHTML
   }
 }
 
-function start() {
+function loadHeadStyles(notebookHtml) {
+  const headStyles = Array.from(notebookHtml.head.getElementsByTagName('style'));
+  
+  headStyles.forEach(styleElement => {
+    const clonedStyleElement = styleElement.cloneNode(true);
+    document.head.appendChild(clonedStyleElement);
+  });
+}
+
+async function loadHeadScripts(notebookHtml) {
+  const headContent = notebookHtml.head;
+  const scriptElements = Array.from(headContent.getElementsByTagName('script'));
+
+  // Filter out script elements that have a 'src' attribute
+  const scriptsWithSrc = scriptElements.filter(script => script.src);
+
+  const scriptsLoaded = new Promise((resolve, reject) => {
+    const totalScripts = scriptsWithSrc.length;
+    let scriptsLoadedCount = 0;
+
+    // Function to resolve the promise when all scripts have loaded
+    function checkAllScriptsLoaded() {
+      if (scriptsLoadedCount === totalScripts) {
+        console.log("All scripts in the head have loaded successfully.");
+        resolve();
+      }
+    }
+
+    scriptsWithSrc.forEach(script => {
+      const scriptElement = document.createElement('script');
+      scriptElement.src = script.src;
+      console.log('Loading script:', script.src);
+      
+      // Listen for the 'load' event of each script
+      scriptElement.onload = () => {
+        console.log("Script loaded successfully:", script.src);
+        scriptsLoadedCount++;
+        checkAllScriptsLoaded(); // Check if all scripts have loaded
+      };
+
+      // Listen for the 'error' event of each script
+      scriptElement.onerror = () => {
+        console.error("Error loading script:", script.src);
+        reject(new Error(`Failed to load script: ${script.src}`));
+      };
+
+      document.head.appendChild(scriptElement);
+    });
+  });
+
+  // Wait for all scripts with 'src' attribute to load before resolving
+  await scriptsLoaded;
+}
+
+async function loadScripts(notebookHtml) {
+  const bodyScripts = Array.from(notebookHtml.body.getElementsByTagName('script'));
+  console.log('aaaaaaaaa')
+  console.log(bodyScripts)
+
+  // Define a recursive function to load scripts sequentially
+  async function loadNextScript(index) {
+    if (index >= bodyScripts.length) {
+      // All scripts have been loaded
+      console.log("All scripts in the body have loaded successfully.");
+      return;
+    }
+
+    const currentScript = bodyScripts[index];
+    console.log('===================================================')
+    console.log(currentScript)
+    try {
+      await loadScript(currentScript);
+      // Load the next script recursively
+      await loadNextScript(index + 1);
+    } catch (error) {
+      console.error("Error loading script:", currentScript.src || "inline script");
+      console.error(error);
+      // If an error occurs, stop loading scripts
+      throw error;
+    }
+  }
+
+  // Start loading scripts recursively from the first one
+  await loadNextScript(0);
+}
+
+async function saveloadScripts(notebookHtml) {
+  const bodyScripts = Array.from(notebookHtml.body.getElementsByTagName('script'));
+  
+  for (const currentScript of bodyScripts) {
+      await loadScript(currentScript);
+  }
+}
+
+
+async function loadScript(scriptElement) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    if (scriptElement.src) {
+      script.src = scriptElement.src;
+      script.onload = () => {
+        resolve();
+      };
+      script.onerror = (error) => {
+        reject(error);
+      };
+      document.body.appendChild(script);
+    } else {
+        script.textContent = scriptElement.textContent;
+        document.body.appendChild(script);
+      resolve();
+    }
+  });
+}
+
+
+async function start() {
     addCss()
 
-    var result = document.createElement('div');
-    result.classList.add('grid-stack')
 
-    const cellsDom = document.querySelectorAll('.jp-Cell')
+    const notebook = await getNotebook()
+    const parser = new DOMParser()
+    const notebookHtml = parser.parseFromString(notebook, 'text/html')
+    await loadHeadStyles(notebookHtml)
+    await loadHeadScripts(notebookHtml)
+/*
+require.config({
+    waitSeconds: 30,
+    paths: {
+        'echarts': 'https://assets.pyecharts.org/assets/v5/echarts.min'
+    }
+});
+*/
+    //await loadScripts(notebookHtml)
+	/*
+    const headContent = notebookHtml.head
+    headContent.childNodes.forEach(node => {
+      document.head.appendChild(node.cloneNode(true))
+    })
+    */
+    const cellsDom = notebookHtml.querySelectorAll('.jp-Cell')
+    //const cellsDom = document.querySelectorAll('.jp-Cell')
     var id = 0
     for(var i = 0; i < cellsDom.length; i++) {
       var cell = new Cell(cellsDom[i])
@@ -361,11 +510,16 @@ function start() {
       }
     }
 
+/*
     const jpCells = document.querySelectorAll('div.jp-Cell');
     
     jpCells.forEach(function (element) {
         element.remove();
       });
+*/
+
+    //var mainElement = document.querySelector("main")
+    //mainElement.parentNode.removeChild(mainElement)
 
     var result = document.createElement('div');
     result.classList.add('grid-stack-main')
@@ -417,11 +571,29 @@ function start() {
       }
       gridTrash.load(trashCells)
 
+
+      console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+      console.log(notebookHtml)
+      loadScripts(notebookHtml)
+
+/*
+      setTimeout(function() {
+        console.log('load script')
+        loadScripts(notebookHtml)
+      }, 0)
+*/
+
       window.addEventListener("resize", function(event){
         if(edit) {
           addGridEditStyle(grid)
         }
       }, true)
+
+      const defaultCells = document.querySelectorAll('.default-cell')
+      defaultCells.forEach(cell => {
+        const parent = cell.parentElement
+	parent.classList.add('parent-of-default-cell')
+      })
 
 	    
       return grid
@@ -503,8 +675,6 @@ function addResizes() {
 
 function addResize(el) {
   var resizeType = el.getAttribute('resize-type')
-  console.log('resizeType')
-  console.log(resizeType)
   switch (resizeType) {
     case "vega":
       observeVega(el.parentElement.parentElement)
@@ -548,8 +718,6 @@ function resizePlotly(plotlyEl) {
 
 function resizeVega(vegaEl) {
       var vegaId = vegaEl.getAttribute('id')
-      console.log('vegaId')
-      console.log(vegaId)
       var scriptStr = vegaEl.nextElementSibling.textContent
       scriptStr = scriptStr.replace(
 	      'let outputDiv = document.currentScript.previousElementSibling;',
@@ -570,7 +738,6 @@ function resizeVega(vegaEl) {
         scriptStr = scriptStr.replace(payloadStr, JSON.stringify(payload)) 
         scriptStr = `
             const currentVega = document.getElementById('${vegaId}');
-            console.log("inside script")
             currentVega.style.width = currentVega.parentElement.clientWidth*0.98 + 'px'
             currentVega.style.height = currentVega.parentElement.clientHeight*0.98 + 'px'
             ${scriptStr}
@@ -582,19 +749,21 @@ function resizeVega(vegaEl) {
 
 
 
-function init() {
+async function init() {
   //saveToIndexedDb(document.documentElement.outerHTML)
   saveToIndexedDb()
   addHtml()
-  grid = start()
+  grid = await start()
   addResizes()
   addJs()
 
+	/*
   if (edit) {
     addEditStyle()
   } else {
     grid.disable()
   }
+  */
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -709,6 +878,39 @@ function getSavedData() {
 }
 
 function download() {
+      const template = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Your Title Here</title>
+	<link href="https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet">
+	<script src="https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js"></script>
+	<script src="https://code.iconify.design/1/1.0.6/iconify.min.js"></script>
+	<script src="http://localhost:3000/2.0/zlatko.js" defer=""></script>
+      </head>
+      <body>
+        <script>
+          var savedData =  ${JSON.stringify(getSavedData())}
+	  var edit = false
+          var fileName = '${fileName}'
+          var encodedNotebook = '${encodedNotebook}'
+        </script>
+      </body>
+      </html>
+      `
+      var blob = new Blob([template], { type: 'text/html' })
+      //var blob = new Blob([doc.body.firstChild.outerHTML], { type: 'text/html' })
+      var blobUrl = URL.createObjectURL(blob)
+      var downloadLink = document.createElement('a')
+      downloadLink.href = blobUrl
+      downloadLink.download = fileName + '_dashboard.html'
+      downloadLink.click()
+      URL.revokeObjectURL(blobUrl)
+}
+
+function savedownload() {
   const dbPromise = indexedDB.open('jupyterGrid')
 
   dbPromise.onsuccess = (event) => {
@@ -728,8 +930,8 @@ function download() {
       const script = document.createElement('script')
       script.src = 'https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js'
       const scriptSelf = document.createElement('script')
-      scriptSelf.src = 'https://jupyter-gridstack.pages.dev/2.0/zlatko.js'
-      //scriptSelf.src = 'http://localhost:3000/1.0/zlatko.js'
+      //scriptSelf.src = 'https://jupyter-gridstack.pages.dev/2.0/zlatko.js'
+      scriptSelf.src = 'http://localhost:3000/2.0/zlatko.js'
       scriptSelf.defer = true
       const scriptIconify = document.createElement('script')
       scriptIconify.src = 'https://code.iconify.design/1/1.0.6/iconify.min.js'
@@ -826,6 +1028,24 @@ function addHtml() {
   document.body.insertAdjacentHTML('afterbegin', htmlString)
 }
 
+function getNotebook() {
+  return new Promise((resolve, reject) => {
+    const dbPromise = indexedDB.open('jupyterGrid')
+
+    dbPromise.onsuccess = (event) => {
+      const database = event.target.result
+      const transaction = database.transaction('notebooks', 'readwrite');
+      const objectStore = transaction.objectStore('notebooks');
+
+      const request = objectStore.get('notebook');
+      request.onsuccess = (e) => {
+        const notebook = e.target.result
+        resolve(notebook)
+      }
+    }
+  })
+}
+
 function addJs() {
         var trashBtn = document.getElementById('trashBtn');
         var editBtn = document.getElementById('editBtn');
@@ -846,10 +1066,13 @@ function addJs() {
 	  trashBtn.classList.toggle('hidden')
 	}
 */
+	console.log('eeedit??????,')
+	console.log(edit)
 	if(edit) {
 	  //downloadBtn.style.display = 'none'
 	  topBarView.classList.toggle('hidden')
 	} else {
+          grid.disable()
 	  topBarEdit.classList.toggle('hidden')
 	  //trashBtn.classList.toggle('hidden')
 	}
