@@ -111,6 +111,9 @@ body.drawer-open {
 .grid-stack-item {
   position: relative;
 }
+.margin-bottom-100 {
+  margin-bottom: 100px;
+}
 .grid-stack-main .overlay-card {
   cursor: grab;
 }
@@ -287,7 +290,6 @@ class Cell {
       div.append(this.vegaEl.querySelectorAll("div")[0])
       div.append(this.vegaEl.querySelectorAll("script")[0])
     } else if (this.type === 'bokeh') {
-      console.log('boookeeehhh')
       //div.append(document.querySelectorAll('[data-root-id]')[0])
       //div.append(document.querySelector('script'))
       //div.innerHTML = this.bokehEl.innerHTML
@@ -342,7 +344,6 @@ class Cell {
         //document.body.appendChild(script)
         //div.appendChild(script)
       } else {
-        console.log('not found!!!!!!!!')
         div.appendChild(this.el.cloneNode(true))
       }
     } else {
@@ -381,7 +382,6 @@ async function loadHeadScripts(notebookHtml) {
     // Function to resolve the promise when all scripts have loaded
     function checkAllScriptsLoaded() {
       if (scriptsLoadedCount === totalScripts) {
-        console.log("All scripts in the head have loaded successfully.");
         resolve();
       }
     }
@@ -389,11 +389,9 @@ async function loadHeadScripts(notebookHtml) {
     scriptsWithSrc.forEach(script => {
       const scriptElement = document.createElement('script');
       scriptElement.src = script.src;
-      console.log('Loading script:', script.src);
       
       // Listen for the 'load' event of each script
       scriptElement.onload = () => {
-        console.log("Script loaded successfully:", script.src);
         scriptsLoadedCount++;
         checkAllScriptsLoaded(); // Check if all scripts have loaded
       };
@@ -414,20 +412,15 @@ async function loadHeadScripts(notebookHtml) {
 
 async function loadScripts(notebookHtml) {
   const bodyScripts = Array.from(notebookHtml.body.getElementsByTagName('script'));
-  console.log('aaaaaaaaa')
-  console.log(bodyScripts)
 
   // Define a recursive function to load scripts sequentially
   async function loadNextScript(index) {
     if (index >= bodyScripts.length) {
       // All scripts have been loaded
-      console.log("All scripts in the body have loaded successfully.");
       return;
     }
 
     const currentScript = bodyScripts[index];
-    console.log('===================================================')
-    console.log(currentScript)
     try {
       await loadScript(currentScript);
       // Load the next script recursively
@@ -523,7 +516,6 @@ require.config({
 
     var result = document.createElement('div');
     result.classList.add('grid-stack-main')
-    result.setAttribute('v-scope', '')
     document.body.appendChild(result)
 
     var htmlString = ` 
@@ -572,8 +564,6 @@ require.config({
       gridTrash.load(trashCells)
 
 
-      console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-      console.log(notebookHtml)
       loadScripts(notebookHtml)
 
 /*
@@ -594,6 +584,14 @@ require.config({
         const parent = cell.parentElement
 	parent.classList.add('parent-of-default-cell')
       })
+
+	/*
+      grid.on('added removed change', function() {
+	console.log('grid change')
+        adjustGridHeight()
+      })
+      */
+	
 
 	    
       return grid
@@ -751,7 +749,7 @@ function resizeVega(vegaEl) {
 
 async function init() {
   //saveToIndexedDb(document.documentElement.outerHTML)
-  saveToIndexedDb()
+  await saveToIndexedDb()
   addHtml()
   grid = await start()
   addResizes()
@@ -775,11 +773,13 @@ document.addEventListener('DOMContentLoaded', function() {
 function addEditStyle() {
   addCardEditStyle()
   addGridEditStyle(grid)
+  document.querySelector('.grid-stack-main').classList.toggle('margin-bottom-100')
 }
 
 function removeEditStyle() {
   removeCardEditStyle()
   removeGridEditStyle()
+  document.querySelector('.grid-stack-main').classList.toggle('margin-bottom-100')
 }
 
 function addCardEditStyle() {
@@ -849,22 +849,63 @@ function removeCardEditStyle() {
 }
 
 
+async function fetchNotebookFromUrl() {
+  const response = await fetch(urlNotebook)
+  const html = await response.text()
+  return html
+}
 
-function saveToIndexedDb () {
+
+function fetchNotebookFromScript() {
+  const scriptEncodedNotebook = document.getElementById('scriptEncodedNotebook')
+  const encodedNotebook = scriptEncodedNotebook.textContent.trim().slice(1, -1)
   const notebook = decodeURIComponent(escape(window.atob(encodedNotebook)))
+  return notebook
+}
+
+
+async function fetchNotebook() {
+  if (typeof urlNotebook === 'undefined') {
+    return fetchNotebookFromScript()
+  }
+  return await fetchNotebookFromUrl()
+}
+
+function modifyNotebook(notebook) {
+  const parser = new DOMParser()
+  const htmlDocument = parser.parseFromString(notebook, 'text/html');
+  const rootElement = htmlDocument.documentElement;
+  const scripts = htmlDocument.getElementsByTagName('script')
+  for (const currentScript of scripts) {
+    const scriptContent = currentScript.textContent
+    if (scriptContent.includes('require.config')) {
+      if (!scriptContent.includes('waitSeconds')) {
+        const modifiedScriptContent = scriptContent.replace(
+          'require.config({',
+          'require.config({\n    waitSeconds: 30,'
+	)
+	currentScript.textContent = modifiedScriptContent
+      }
+    }
+  }
+  return rootElement.outerHTML
+}
+
+async function saveToIndexedDb () {
+  var notebook = await fetchNotebook()
+  notebook = modifyNotebook(notebook)
+  console.log(notebook)
   const dbPromise = indexedDB.open('jupyterGrid')
   dbPromise.onupgradeneeded = (event) => {
-    const database = event.target.result;
-    // Check if the object store exists, and create it if necessary
+    const database = event.target.result
     if (!database.objectStoreNames.contains('notebooks')) {
       database.createObjectStore('notebooks')
     }
   };
   dbPromise.onsuccess = (event) => {
     const database = event.target.result
-    const transaction = database.transaction('notebooks', 'readwrite');
+    const transaction = database.transaction(['notebooks'], 'readwrite')
     const objectStore = transaction.objectStore('notebooks');
-
     objectStore.put(notebook, 'notebook');
   }
 }
@@ -878,28 +919,58 @@ function getSavedData() {
 }
 
 function download() {
-      const template = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Your Title Here</title>
-	<link href="https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet">
-	<script src="https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js"></script>
-	<script src="https://code.iconify.design/1/1.0.6/iconify.min.js"></script>
-	<script src="http://localhost:3000/2.0/zlatko.js" defer=""></script>
-      </head>
-      <body>
-        <script>
-          var savedData =  ${JSON.stringify(getSavedData())}
-	  var edit = false
-          var fileName = '${fileName}'
-          var encodedNotebook = '${encodedNotebook}'
-        </script>
-      </body>
-      </html>
-      `
+      let template
+      if (typeof urlNotebook !== 'undefined') {
+	      template = `
+	      <!DOCTYPE html>
+	      <html>
+	      <head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Your Title Here</title>
+		<link href="https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet">
+		<script src="https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js"></script>
+		<script src="https://code.iconify.design/1/1.0.6/iconify.min.js"></script>
+		<script src="http://localhost:3000/2.0/zlatko.js" defer=""></script>
+	      </head>
+	      <body>
+		<script>
+		  var urlNotebook = "${urlNotebook}"
+		  var savedData =  ${JSON.stringify(getSavedData())}
+		  var edit = false
+		  var fileName = '${fileName}'
+		</script>
+	      </body>
+	      </html>
+	      `
+      } else {
+	      const scriptEncodedNotebook = document.getElementById('scriptEncodedNotebook')
+	      const encodedNotebook = scriptEncodedNotebook.textContent.trim().slice(1, -1)
+	      template = `
+	      <!DOCTYPE html>
+	      <html>
+	      <head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Your Title Here</title>
+		<link href="https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet">
+		<script src="https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js"></script>
+		<script src="https://code.iconify.design/1/1.0.6/iconify.min.js"></script>
+		<script src="http://localhost:3000/2.0/zlatko.js" defer=""></script>
+	      </head>
+	      <body>
+		<script id="scriptEncodedNotebook">
+		  "${encodedNotebook}"
+		</script>
+		<script>
+		  var savedData =  ${JSON.stringify(getSavedData())}
+		  var edit = false
+		  var fileName = '${fileName}'
+		</script>
+	      </body>
+	      </html>
+	      `
+      }
       var blob = new Blob([template], { type: 'text/html' })
       //var blob = new Blob([doc.body.firstChild.outerHTML], { type: 'text/html' })
       var blobUrl = URL.createObjectURL(blob)
@@ -1066,11 +1137,11 @@ function addJs() {
 	  trashBtn.classList.toggle('hidden')
 	}
 */
-	console.log('eeedit??????,')
-	console.log(edit)
 	if(edit) {
 	  //downloadBtn.style.display = 'none'
 	  topBarView.classList.toggle('hidden')
+          addEditStyle()
+          //adjustGridHeight()
 	} else {
           grid.disable()
 	  topBarEdit.classList.toggle('hidden')
@@ -1152,3 +1223,4 @@ function addJs() {
             }
         });
 }
+

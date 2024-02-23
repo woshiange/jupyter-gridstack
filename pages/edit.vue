@@ -20,6 +20,7 @@ onMounted(() => {
     router.push({ name: 'index' })
   }
   iframeContent.value = notebookStore.transformedNotebook
+  //iframeContent.value = notebookStore.urlNotebook
 });
 
 </script>
