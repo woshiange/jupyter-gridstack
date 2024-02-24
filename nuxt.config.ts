@@ -20,6 +20,10 @@ export default defineNuxtConfig({
       styles: true,
       autoImport: true,
       useVuetifyLabs: false, 
+    },
+
+    router: {
+      base: '/jupyter-gridstack/'
     }
   },
   devtools: { enabled: true },
