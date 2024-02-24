@@ -29,4 +29,7 @@ export default defineNuxtConfig({
     publicPath: '/jupyter-gridstack/'
   },
   devtools: { enabled: true },
+  app: {
+    baseURL: '/jupyter-gridstack/'
+  }
 })
