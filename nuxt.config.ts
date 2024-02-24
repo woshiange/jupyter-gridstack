@@ -22,12 +22,6 @@ export default defineNuxtConfig({
       useVuetifyLabs: false, 
     }
   },
-  router: {
-    base: '/jupyter-gridstack/'
-  },
-  build: {
-    publicPath: '/jupyter-gridstack/'
-  },
   devtools: { enabled: true },
   app: {
     baseURL: '/jupyter-gridstack/'
