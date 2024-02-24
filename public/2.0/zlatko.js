@@ -7,203 +7,6 @@ function getElementByXpath(path, doc) {
   return doc.evaluate(path, doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue 
 }
 
-function addCss() {
-var styles = `
-body {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  margin-bottom: 0 !important;
-  margin-top: 60px !important;
-  padding: 0 !important;
-}
-body.drawer-open {
-  overflow: hidden;
-}
-.top-right {
-  position: absolute;
-  top: -4px;
-  right: 15px;
-  z-index: 3;
-}
-.top-right .iconify {
-  width: 30px;
-  height: 30px;
-  background: rgb(255, 255, 255);
-  border-radius: 50px;
-  border: 1px solid #000;
-  cursor: pointer;
-}
-#topBar {
-  height: 40px;
-  background-color: rgba(80, 158, 227);
-  z-index: 999;
-  padding: 10px;
-  position: fixed;
-  width: 100%;
-  top: 0;
-  display: flex;
-  align-items: center;
-}
-.grid-stack-item-content {
-  background-color: #f1f1f1;
-  border-radius: 10px;
-  border-style: solid;
-  box-shadow: 0px 1px 3px rgb(0 0 0 / 13%);
-}
-#drawer {
-  position: fixed;
-  top: 60px;
-  left: -300px;
-  width: 300px;
-  height: 100%;
-  background-color: #f0f0f0;
-  transition: left 0.3s ease;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  z-index: 998;
-  overflow-y: auto;
-}
-#drawer ul {
-  list-style: none;
-  padding: 20px;
-  margin: 0;
-}
-#overlay {
-  display: none;
-  position: fixed;
-  top: 40px;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.3);
-  z-index: 997;
-}
-.app-bar-button {
-  width: 40px;
-}
-.centered {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  color: rgb(255, 255, 255);
-  font-weight: bold;
-  align-items: center;
-}
-.hidden {
-  display: none !important;
-}
-#notebookContainer {
-  height: 100vh;
-  width: 100vw;
-}
-#notebookIframe {
-  height: 100%;
-  width: 100%;
-}
-.overlay-card {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0);
-  z-index: 1;
-}
-.grid-stack-item {
-  position: relative;
-}
-.margin-bottom-100 {
-  margin-bottom: 100px;
-}
-.grid-stack-main .overlay-card {
-  cursor: grab;
-}
-.default-cell {
-  display: flex;
-  justify-content: center;
-}
-.white-bg {
-  transition: background-color 0.3s ease;
-  background-color: rgb(255, 255, 255);
-  color: rgb(80, 158, 227);
-  cursor: pointer;
-}
-#doneBtn {
-  border: none;
-  border-radius: 10%;
-  font-weight: bold;
-  padding: 10px;
-  margin-left: 10px;
-}
-.iconify.white-bg {
-  border-radius: 30%;
-  width: 30px;
-  height: 30px;
-}
-.white-bg:hover {
-  background-color: rgb(80, 158, 227);
-  color: white;
-}
-#topBarEdit {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  align-items: center;
-}
-#topBarView {
-  position: relative;
-  width: 100%;
-}
-#closeBtn {
-  position: absolute;
-  top: -5px;
-  right: 15px;
-}
-#closeBtn .iconify {
-  color: rgb(255, 255, 255);
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-}
-.tooltip-container {
-  position: relative;
-}
-.tooltip {
-  visibility: hidden;
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #333;
-  color: #fff;
-  padding: 5px;
-  border-radius: 5px;
-  white-space: nowrap;
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-}
-.tooltip-container:hover .tooltip {
-  visibility: visible;
-  opacity: 1;
-}
-#viewDashboardBtn {
-  margin-left: 30px
-}
-#editBtn {
-  margin-left: 30px
-}
-.jp-RenderedHTMLCommon {
-  padding: 0 !important;
-}
-.parent-of-default-cell {
-  display: flex;
-  align-items: center;
-}
-`
-var styleSheet = document.createElement("style")
-styleSheet.innerText = styles
-document.head.appendChild(styleSheet)
-}
-
 
 class Cell {
   constructor(el) {
@@ -468,7 +271,6 @@ async function loadScript(scriptElement) {
 
 
 async function start() {
-    addCss()
 
 
     const notebook = await getNotebook()
@@ -894,7 +696,6 @@ function modifyNotebook(notebook) {
 async function saveToIndexedDb () {
   var notebook = await fetchNotebook()
   notebook = modifyNotebook(notebook)
-  console.log(notebook)
   const dbPromise = indexedDB.open('jupyterGrid')
   dbPromise.onupgradeneeded = (event) => {
     const database = event.target.result
@@ -931,6 +732,7 @@ function download() {
 		<link href="https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet">
 		<script src="https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js"></script>
 		<script src="https://code.iconify.design/1/1.0.6/iconify.min.js"></script>
+	        <link href="http://localhost:3000/2.0/zlatko.css" rel="stylesheet">
 		<script src="http://localhost:3000/2.0/zlatko.js" defer=""></script>
 	      </head>
 	      <body>
@@ -956,6 +758,7 @@ function download() {
 		<link href="https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet">
 		<script src="https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js"></script>
 		<script src="https://code.iconify.design/1/1.0.6/iconify.min.js"></script>
+	        <link href="http://localhost:3000/2.0/zlatko.css" rel="stylesheet">
 		<script src="http://localhost:3000/2.0/zlatko.js" defer=""></script>
 	      </head>
 	      <body>
@@ -981,61 +784,6 @@ function download() {
       URL.revokeObjectURL(blobUrl)
 }
 
-function savedownload() {
-  const dbPromise = indexedDB.open('jupyterGrid')
-
-  dbPromise.onsuccess = (event) => {
-    const database = event.target.result
-    const transaction = database.transaction('notebooks', 'readwrite');
-    const objectStore = transaction.objectStore('notebooks');
-
-    const request = objectStore.get('notebook');
-    request.onsuccess = (e) => {
-      const notebook = e.target.result
-      const parser = new DOMParser()
-      const htmlDocument = parser.parseFromString(notebook, 'text/html')
-      const rootElement = htmlDocument.documentElement
-      const link = document.createElement('link');
-      link.href = 'https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css'
-      link.rel = 'stylesheet'
-      const script = document.createElement('script')
-      script.src = 'https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js'
-      const scriptSelf = document.createElement('script')
-      //scriptSelf.src = 'https://jupyter-gridstack.pages.dev/2.0/zlatko.js'
-      scriptSelf.src = 'http://localhost:3000/2.0/zlatko.js'
-      scriptSelf.defer = true
-      const scriptIconify = document.createElement('script')
-      scriptIconify.src = 'https://code.iconify.design/1/1.0.6/iconify.min.js'
-      const referenceNode = rootElement.querySelector('meta[name="viewport"]')
-      referenceNode.parentNode.insertBefore(scriptIconify, referenceNode.nextSibling)
-      referenceNode.parentNode.insertBefore(scriptSelf, referenceNode.nextSibling)
-      referenceNode.parentNode.insertBefore(script, referenceNode.nextSibling)
-      referenceNode.parentNode.insertBefore(link, referenceNode.nextSibling)
-      const scriptSavedData = document.createElement('script')
-      scriptSavedData.textContent = "var savedData = " + JSON.stringify(getSavedData())
-      var bodyElement = rootElement.getElementsByTagName('body')[0]
-      bodyElement.insertBefore(scriptSavedData, bodyElement.firstChild)
-      const scriptFileName= document.createElement('script')
-      scriptFileName.textContent = `var fileName = '${fileName}'`
-      bodyElement.insertBefore(scriptFileName, bodyElement.firstChild)
-      const scriptEdit = document.createElement('script')
-      scriptEdit.textContent = "var edit = false"
-      bodyElement.insertBefore(scriptEdit, bodyElement.firstChild)
-      const scriptEncodedNotebook = document.createElement('script')
-      scriptEncodedNotebook.textContent = `var encodedNotebook = '${encodedNotebook}'`
-      bodyElement.appendChild(scriptEncodedNotebook)
-
-      var blob = new Blob([rootElement.outerHTML], { type: 'text/html' })
-      //var blob = new Blob([doc.body.firstChild.outerHTML], { type: 'text/html' })
-      var blobUrl = URL.createObjectURL(blob)
-      var downloadLink = document.createElement('a')
-      downloadLink.href = blobUrl
-      downloadLink.download = fileName + '_dashboard.html'
-      downloadLink.click()
-      URL.revokeObjectURL(blobUrl)
-    }
-  }
-}
 
 function populateNotebookIframe() {
   const dbPromise = indexedDB.open('jupyterGrid')
