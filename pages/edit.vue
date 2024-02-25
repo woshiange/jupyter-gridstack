@@ -19,8 +19,8 @@ onMounted(() => {
   if(!notebookStore.notebook && !notebookStore.transformedNotebookFromEdit) {
     router.push({ name: 'index' })
   }
-  iframeContent.value = notebookStore.transformedNotebook
-  //iframeContent.value = notebookStore.urlNotebook
+  //iframeContent.value = notebookStore.transformedNotebook
+  iframeContent.value = notebookStore.urlNotebook
 });
 
 </script>
