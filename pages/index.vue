@@ -33,11 +33,30 @@
         </div>
       </label>
     </div>
+    <v-container fluid class="bg-surface-variant mt-10">
+    <h2 class="d-flex justify-center">Example Gallery</h2>
+    <div class="d-flex justify-center mt-3">
+      <div style="max-width: 900px">
+      <v-row justify="center">
+        <v-col v-for="dashboard in dashboards"
+          cols="12"
+          sm="5"
+          class="d-flex justify-center"
+        >
+          <DashboardCard
+            :title="dashboard.title"
+            :imageUrl="dashboard.imageUrl"
+	    :linkUrl="dashboard.linkUrl"
+          />
+        </v-col>
+      </v-row>
+      </div>
+    </div>
+  </v-container>
   </v-container>
 </template>
 
 <script scoped>
-import { addToBody, mainScript } from '@/utils.js'
 import { mapStores } from 'pinia'
 export default {
   data() {
@@ -46,7 +65,13 @@ export default {
       files: [],
       file: null,
       fileContent: null,
-      loaderMessage: ''
+      loaderMessage: '',
+      dashboards: [
+        {"title": "stefan", "linkUrl": "/dashboards/iowa_liquor_sales_dashboard.html", "imageUrl": "/images/iowa_liquor_sales_dashboard.jpg"},
+        {"title": "stefan", "linkUrl": "/dashboards/iowa_liquor_sales_dashboard.html", "imageUrl": "/images/iowa_liquor_sales_dashboard.jpg"},
+        {"title": "stefan", "linkUrl": "/dashboards/iowa_liquor_sales_dashboard.html", "imageUrl": "/images/iowa_liquor_sales_dashboard.jpg"},
+        {"title": "stefan", "linkUrl": "/dashboards/iowa_liquor_sales_dashboard.html", "imageUrl": "/images/iowa_liquor_sales_dashboard.jpg"},
+      ]
     };
   },
   computed: {
