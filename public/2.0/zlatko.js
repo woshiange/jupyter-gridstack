@@ -283,16 +283,9 @@ async function start() {
 	id = id + 1
       }
     }
-    var result = document.createElement('div');
-    result.classList.add('grid-stack-main')
-    document.body.appendChild(result)
-
-    var htmlString = ` 
-      <div id="notebookContainer" class="hidden">
-        <iframe id="notebookIframe" frameborder="0"></iframe>
-      </div>
-    `
-    document.body.insertAdjacentHTML('beforeend', htmlString)
+    //var result = document.createElement('div');
+    //result.classList.add('grid-stack-main')
+    //document.body.appendChild(result)
 
 
     var gridDef = {
@@ -306,13 +299,14 @@ async function start() {
       }
     }
     var gridTrashDef = {
-      margin: 2,
+      margin: 5,
       cellHeight: '70px',
       column: 1,
       disableDrag: true,
       disableResize: true
     }
     
+    addHtml()
     grid = GridStack.init(gridDef, '.grid-stack-main')
     gridTrash = GridStack.init(gridTrashDef, '.grid-stack-trash')
 
@@ -374,11 +368,14 @@ function addGridEditStyle(grid) {
    var currentWidth = grid.cellWidth()
   removeGridEditStyle()
   var styles = `
-.grid-stack {
-background-image: linear-gradient(#e0e0e0 1px, transparent 1px), linear-gradient(90deg, #e0e0e0 1px, transparent 0px), linear-gradient(rgba(255,255,255,.3) 5px, transparent 100px), linear-gradient(90deg, rgba(255,255,255,.3) 5px, transparent 100px);
-background-size: 100px 100px, calc(8.33% + 0px) 100px, 20px 20px, 20px 20px;
-background-position: -2px -2px, -1px -2px, -1px -1px, -1px -1px;}
-}
+    .grid-stack {
+      background-image: linear-gradient(rgba(224, 224, 224, 0.5) 1px, transparent 1px), 
+                        linear-gradient(90deg, rgba(224, 224, 224, 0.5) 1px, transparent 0px), 
+                        linear-gradient(rgba(255, 255, 255, 0) 5px, transparent 100px), 
+                        linear-gradient(90deg, rgba(255, 255, 255, 0) 5px, transparent 100px);                     
+      background-size: 100px 100px, calc(8.33% + 0px) 100px, 20px 20px, 20px 20px;                                                            
+      background-position: -2px -2px, -1px -2px, -1px -1px, -1px -1px;
+    }
   `
   var styleSheet = document.createElement("style")
   styleSheet.setAttribute("id", "gridStyleSheetId")
@@ -522,7 +519,6 @@ function resizeVega(vegaEl) {
 async function init() {
   //saveToIndexedDb(document.documentElement.outerHTML)
   await saveToIndexedDb()
-  addHtml()
   grid = await start()
   addResizes()
   addJs()
@@ -690,68 +686,51 @@ function getSavedData() {
 }
 
 function download() {
-      let template
-      if (typeof urlNotebook !== 'undefined') {
-	      template = `
-	      <!DOCTYPE html>
-	      <html>
-	      <head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Your Title Here</title>
-		<link href="https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet">
-		<script src="https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js"></script>
-		<script src="https://code.iconify.design/1/1.0.6/iconify.min.js"></script>
-	        <link href="http://localhost:3000/jupyter-gridstack/2.0/zlatko.css" rel="stylesheet">
-		<script src="http://localhost:3000/jupyter-gridstack/2.0/zlatko.js" defer=""></script>
-	      </head>
-	      <body>
-		<script>
-		  var urlNotebook = "${urlNotebook}"
-		  var savedData =  ${JSON.stringify(getSavedData())}
-		  var edit = false
-		  var fileName = '${fileName}'
-		</script>
-	      </body>
-	      </html>
-	      `
-      } else {
-	      const scriptEncodedNotebook = document.getElementById('scriptEncodedNotebook')
-	      const encodedNotebook = scriptEncodedNotebook.textContent.trim().slice(1, -1)
-	      template = `
-	      <!DOCTYPE html>
-	      <html>
-	      <head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Your Title Here</title>
-		<link href="https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet">
-		<script src="https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js"></script>
-		<script src="https://code.iconify.design/1/1.0.6/iconify.min.js"></script>
-	        <link href="http://localhost:3000/jupyter-gridstack/2.0/zlatko.css" rel="stylesheet">
-		<script src="http://localhost:3000/jupyter-gridstack/2.0/zlatko.js" defer=""></script>
-	      </head>
-	      <body>
-		<script id="scriptEncodedNotebook">
-		  "${encodedNotebook}"
-		</script>
-		<script>
-		  var savedData =  ${JSON.stringify(getSavedData())}
-		  var edit = false
-		  var fileName = '${fileName}'
-		</script>
-	      </body>
-	      </html>
-	      `
-      }
-      var blob = new Blob([template], { type: 'text/html' })
-      //var blob = new Blob([doc.body.firstChild.outerHTML], { type: 'text/html' })
-      var blobUrl = URL.createObjectURL(blob)
-      var downloadLink = document.createElement('a')
-      downloadLink.href = blobUrl
-      downloadLink.download = fileName + '_dashboard.html'
-      downloadLink.click()
-      URL.revokeObjectURL(blobUrl)
+  const template = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Your Title Here</title>
+        <link href="https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet">
+        <script src="https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js"></script>
+        <script src="https://code.iconify.design/1/1.0.6/iconify.min.js"></script>
+        <link href="http://localhost:3000/jupyter-gridstack/2.0/zlatko.css" rel="stylesheet">
+        <script src="http://localhost:3000/jupyter-gridstack/2.0/zlatko.js" defer=""></script>
+      </head>
+      <body>
+        <div id="loader-container">
+          <div id="loader"></div>
+        </div>
+        <script>
+          var fileName = '${fileName}'
+	  var savedData =  ${JSON.stringify(getSavedData())}
+	  var edit = false
+        </script>
+      </body>
+    </html>
+  `
+  const parser = new DOMParser()
+  const templateHTML = parser.parseFromString(template, 'text/html')
+  const bodyElement = templateHTML.querySelector('body')
+  const scriptElement = document.createElement('script')
+  if (typeof urlNotebook !== 'undefined') {
+    scriptElement.textContent = `var urlNotebook = "${urlNotebook}"`
+  } else {
+    const scriptEncodedNotebook = document.getElementById('scriptEncodedNotebook')
+    const encodedNotebook = scriptEncodedNotebook.textContent.trim().slice(1, -1)
+    scriptElement.id = 'scriptEncodedNotebook'
+    scriptElement.textContent = `"${encodedNotebook}"`
+  }
+  bodyElement.appendChild(scriptElement)
+  var blob = new Blob([templateHTML.documentElement.outerHTML], { type: 'text/html' })
+  var blobUrl = URL.createObjectURL(blob)
+  var downloadLink = document.createElement('a')
+  downloadLink.href = blobUrl
+  downloadLink.download = fileName + '_dashboard.html'
+  downloadLink.click()
+  URL.revokeObjectURL(blobUrl)
 }
 
 
@@ -811,10 +790,18 @@ function addHtml() {
     </div>
     <div id="overlay"></div>
     <div id="drawer">
-        <div class="grid-stack-trash"></div>
+      <div class="grid-stack-trash"></div>
+    </div>
+    <div id="dashboard-container">
+      <div class="grid-stack-main"></div>
+    </div>
+    <div id="notebookContainer" class="hidden">
+      <iframe id="notebookIframe" frameborder="0"></iframe>
     </div>
   `
+  removeLoader()
   document.body.insertAdjacentHTML('afterbegin', htmlString)
+  addBodyStyle()
 }
 
 function getNotebook() {
@@ -940,5 +927,26 @@ function addJs() {
                 body.classList.remove('drawer-open')
             }
         });
+}
+
+
+function removeLoader() {
+  var loaderContainer = document.getElementById("loader-container")
+  loaderContainer.parentNode.removeChild(loaderContainer)
+}
+
+
+function addBodyStyle() {
+  var style = document.createElement("style")
+  style.textContent = `
+    body {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      margin-bottom: 0 !important;
+      margin-top: 60px !important;
+      padding: 0 !important;
+    }
+  `
+  document.head.appendChild(style)
 }
 

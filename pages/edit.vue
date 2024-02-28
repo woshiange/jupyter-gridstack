@@ -19,6 +19,7 @@ onMounted(() => {
   if(!notebookStore.notebook && !notebookStore.transformedNotebookFromEdit) {
     router.push({ name: 'index' })
   }
+  console.log('load')
   //iframeContent.value = notebookStore.transformedNotebook
   iframeContent.value = notebookStore.urlNotebook
 });
