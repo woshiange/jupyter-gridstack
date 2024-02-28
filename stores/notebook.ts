@@ -16,8 +16,8 @@ export const useNotebook = defineStore('notebook', {
 	<link href="https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet">
 	<script src="https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js"></script>
 	<script src="https://code.iconify.design/1/1.0.6/iconify.min.js"></script>
-	<link href="https://woshiange.github.io/jupyter-gridstack/2.0/zlatko.css" rel="stylesheet">
-	<script src="https://woshiange.github.io/jupyter-gridstack/2.0/zlatko.js" defer=""></script>
+	<link href="http://localhost:3000/jupyter-gridstack/2.0/zlatko.css" rel="stylesheet">
+	<script src="http://localhost:3000/jupyter-gridstack/2.0/zlatko.js" defer=""></script>
       </head>
       <body>
         <script id="scriptEncodedNotebook">
@@ -44,8 +44,8 @@ export const useNotebook = defineStore('notebook', {
 	<link href="https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet">
 	<script src="https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js"></script>
 	<script src="https://code.iconify.design/1/1.0.6/iconify.min.js"></script>
-	<link href="https://woshiange.github.io/jupyter-gridstack/2.0/zlatko.css" rel="stylesheet">
-	<script src="https://woshiange.github.io/jupyter-gridstack/2.0/zlatko.js" defer=""></script>
+	<link href="http://localhost:3000/jupyter-gridstack/2.0/zlatko.css" rel="stylesheet">
+	<script src="http://localhost:3000/jupyter-gridstack/2.0/zlatko.js" defer=""></script>
       </head>
       <body>
         <script>

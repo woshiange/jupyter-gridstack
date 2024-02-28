@@ -77,7 +77,10 @@ class Cell {
       mainDiv.setAttribute('resize-type', 'echarts')
       div.innerHTML = mainDiv.parentElement.innerHTML
     } else if (this.type === 'markdown') {
-      div.innerHTML = this.el.querySelectorAll('.jp-MarkdownOutput')[0].innerHTML
+      const newDiv = document.createElement('div')
+      newDiv.classList.add('default-cell')
+      newDiv.innerHTML = this.el.querySelectorAll('.jp-MarkdownOutput')[0].innerHTML
+      div.appendChild(newDiv)
     } else if (this.type === 'plotly') {
       const mainDiv = this.el.querySelector('div.plotly-graph-div') 
       mainDiv.setAttribute("style", "width:100%; height:100%;")
@@ -240,14 +243,6 @@ async function loadScripts(notebookHtml) {
   await loadNextScript(0);
 }
 
-async function saveloadScripts(notebookHtml) {
-  const bodyScripts = Array.from(notebookHtml.body.getElementsByTagName('script'));
-  
-  for (const currentScript of bodyScripts) {
-      await loadScript(currentScript);
-  }
-}
-
 
 async function loadScript(scriptElement) {
   return new Promise((resolve, reject) => {
@@ -278,23 +273,7 @@ async function start() {
     const notebookHtml = parser.parseFromString(notebook, 'text/html')
     await loadHeadStyles(notebookHtml)
     await loadHeadScripts(notebookHtml)
-/*
-require.config({
-    waitSeconds: 30,
-    paths: {
-        'echarts': 'https://assets.pyecharts.org/assets/v5/echarts.min'
-    }
-});
-*/
-    //await loadScripts(notebookHtml)
-	/*
-    const headContent = notebookHtml.head
-    headContent.childNodes.forEach(node => {
-      document.head.appendChild(node.cloneNode(true))
-    })
-    */
     const cellsDom = notebookHtml.querySelectorAll('.jp-Cell')
-    //const cellsDom = document.querySelectorAll('.jp-Cell')
     var id = 0
     for(var i = 0; i < cellsDom.length; i++) {
       var cell = new Cell(cellsDom[i])
@@ -304,18 +283,6 @@ require.config({
 	id = id + 1
       }
     }
-
-/*
-    const jpCells = document.querySelectorAll('div.jp-Cell');
-    
-    jpCells.forEach(function (element) {
-        element.remove();
-      });
-*/
-
-    //var mainElement = document.querySelector("main")
-    //mainElement.parentNode.removeChild(mainElement)
-
     var result = document.createElement('div');
     result.classList.add('grid-stack-main')
     document.body.appendChild(result)
@@ -330,6 +297,7 @@ require.config({
 
     var gridDef = {
       minRow: 1,
+      margin: 5,
       cellHeight: '100px',
       animate: false,
       columnOpts: {
@@ -381,11 +349,13 @@ require.config({
         }
       }, true)
 
+	/*
       const defaultCells = document.querySelectorAll('.default-cell')
       defaultCells.forEach(cell => {
         const parent = cell.parentElement
 	parent.classList.add('parent-of-default-cell')
       })
+      */
 
 	/*
       grid.on('added removed change', function() {
@@ -732,8 +702,8 @@ function download() {
 		<link href="https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet">
 		<script src="https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js"></script>
 		<script src="https://code.iconify.design/1/1.0.6/iconify.min.js"></script>
-	        <link href="https://woshiange.github.io/jupyter-gridstack/2.0/zlatko.css" rel="stylesheet">
-		<script src="https://woshiange.github.io/jupyter-gridstack/2.0/zlatko.js" defer=""></script>
+	        <link href="http://localhost:3000/jupyter-gridstack/2.0/zlatko.css" rel="stylesheet">
+		<script src="http://localhost:3000/jupyter-gridstack/2.0/zlatko.js" defer=""></script>
 	      </head>
 	      <body>
 		<script>
@@ -758,8 +728,8 @@ function download() {
 		<link href="https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet">
 		<script src="https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js"></script>
 		<script src="https://code.iconify.design/1/1.0.6/iconify.min.js"></script>
-	        <link href="https://woshiange.github.io/jupyter-gridstack/2.0/zlatko.css" rel="stylesheet">
-		<script src="https://woshiange.github.io/jupyter-gridstack/2.0/zlatko.js" defer=""></script>
+	        <link href="http://localhost:3000/jupyter-gridstack/2.0/zlatko.css" rel="stylesheet">
+		<script src="http://localhost:3000/jupyter-gridstack/2.0/zlatko.js" defer=""></script>
 	      </head>
 	      <body>
 		<script id="scriptEncodedNotebook">
