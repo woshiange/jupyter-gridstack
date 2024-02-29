@@ -24,4 +24,5 @@ logs
 
 # Jupyter Notebook
 .ipynb_checkpoints/
+public/python/raw_data/
 
