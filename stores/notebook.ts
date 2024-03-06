@@ -47,7 +47,7 @@ export const useNotebook = defineStore('notebook', {
       const templateHTML = state.templateHTML
       const bodyElement = templateHTML.querySelector('body')
       const scriptElement = document.createElement('script')
-      scriptElement.textContent = `var urlNotebook = "https://woshiange.github.io/jupyter-gridstack/python/fuel_prices_in_france.html"`
+      scriptElement.textContent = `var urlNotebook = "https://woshiange.github.io/jupyter-gridstack/python/singapore_at_a_glance.html"`
       bodyElement.appendChild(scriptElement)
       return templateHTML.documentElement.outerHTML
     },
