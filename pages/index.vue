@@ -1,14 +1,21 @@
 <template>
+  <v-container>
   <v-row>
+    <v-col
+      sm="12"
+    >
+      <h1 :class="(mdAndDown ? 'text-h3 mt-5' : 'text-h1 mt-15') + ' title'">
+        Turn your Jupyter Notebook into a beautiful
+        <span style="color: #509EE3;">dashboard.</span>
+      </h1>
+    </v-col>
     <v-col
       cols="12"
       sm="7"
     >
-      <h1 class="d-flex justify-center mt-15">Turn your Jupyter Notebook into a beautiful dashboard.</h1>
-      <p class="d-flex justify-center">Drag and resize the elements of your notebook to create a dashboard, no additional code is required.</p>
-      <p class="d-flex justify-center">Works with Plotly, Bokeh, Pyecharts, Vega-Altair, or any other data visualization library.</p>
+      <p class="description text-h5">Drag and resize the elements of your notebook to create a dashboard, no additional code is required.</p>
       <div
-        class="dropzone-container d-flex mt-5"
+        class="dropzone-container d-flex mt-10"
         @dragover="dragover"
         @dragleave="dragleave"
         @drop="drop"
@@ -42,17 +49,23 @@
     <v-col
       cols="12"
       sm="5"
+      class="d-flex justify-center"
     >
-      <video width="75%" loop autoplay muted>
+      <video width="100%" loop autoplay muted class="mt-10 elevation-6">
         <source src="/videos/tutorial.webm" type="video/webm">
         Your browser does not support the video tag.
       </video>
     </v-col>
   </v-row>
-  <v-container fluid class="bg-surface-variant mt-10">
-      <h2 class="d-flex justify-center">Example Gallery</h2>
-      <div class="d-flex justify-center mt-3">
-        <div style="max-width: 1400px">
+  <v-row justify="center" class="mt-10">
+    <v-col
+      sm="12"
+      class="text-center"
+    >
+      <hr width="30%" class="mx-auto">
+      <h2 class="mt-5 example-gallery">Example Gallery</h2>
+    </v-col>
+  </v-row>
         <v-row justify="center">
           <v-col v-for="dashboard in dashboards"
             cols="12"
@@ -65,17 +78,17 @@
               :linkUrl="dashboard.linkUrl"
             />
           </v-col>
-        </v-row>
-        </div>
-      </div>
+  </v-row>
   </v-container>
 </template>
 
 <script scoped>
 import { mapStores } from 'pinia'
+import { useDisplay } from 'vuetify'
 export default {
   data() {
     return {
+      mdAndDown: false,
       isDragging: false,
       files: [],
       file: null,
@@ -97,6 +110,10 @@ export default {
       return this.file.name.split('.').at(-1).toLowerCase()
     },
     ...mapStores(useNotebook)
+  },
+  mounted() {
+    const { mdAndDown } = useDisplay()
+    this.mdAndDown = mdAndDown
   },
   methods: {
     onChange() {
@@ -183,11 +200,10 @@ export default {
 <style scoped>
 .dropzone-container {
     padding: 4rem;
-    background: #f7fafc;
     border: 1px solid #e2e8f0;
     margin: 0 auto;
-    width: 50%;
-    background-color: ##C5CAE9;
+    width: 80%;
+    background-color: #f7fafc;
 }
 
 .hidden-input {
@@ -204,6 +220,21 @@ export default {
     cursor: pointer;
     margin: 0 auto;
     width: 100%;
+}
+
+.title {
+  font-family: 'Source Serif Pro', Roboto, serif !important;
+  color: rgb(69, 69, 69);
+}
+
+.description {
+  font-family: helvetica, Roboto, serif !important;
+  color: rgb(110, 110, 110);
+}
+
+.example-gallery {
+  font-family: 'Source Serif Pro', Roboto, serif !important;
+  color: rgb(28, 28, 28);
 }
 </style>
 

@@ -3,12 +3,12 @@ export default defineNuxtConfig({
   pages: true,
   modules: [
     '@invictus.codes/nuxt-vuetify',
-    '@pinia/nuxt'
+    '@pinia/nuxt',
+    '@nuxtjs/google-fonts'
   ],
   vuetify: {
     /* vuetify options */
     vuetifyOptions: {
-      // @TODO: list all vuetify options
     },
 
     moduleOptions: {
@@ -25,5 +25,12 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   app: {
     baseURL: '/jupyter-gridstack/'
-  }
+  },
+
+  googleFonts: {
+    families: {
+      'Source+Serif+Pro': [400, 600, 700]
+    },
+    display: 'swap'
+  },
 })

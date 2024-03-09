@@ -10,8 +10,8 @@
         <v-img
           :src="imageUrl"
           :alt="title"
-          width="569"
-          height="528"
+          width="379"
+          height="352"
           class="position-relative"
         >
           <div class="align-self-center absolute-center">
@@ -38,7 +38,7 @@ a {
 
 .show-btn {
   color: rgba(255, 255, 255, 1) !important;
-  background-color: #5865f2;
+  background-color: #509EE3;
 }
 
 .hide-btn {
