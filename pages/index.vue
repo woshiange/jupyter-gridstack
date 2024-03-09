@@ -1,58 +1,73 @@
 <template>
-  <v-container fluid class="main d-flex flex-column pa-0" style="height: 100vh;">
-    <h1 class="d-flex justify-center mt-15">Jupyter Notebook Converter</h1>
-    <p class="d-flex justify-center">Turn your notebook into a beautiful presentation.</p>
-    <div
-      class="dropzone-container d-flex mt-5"
-      @dragover="dragover"
-      @dragleave="dragleave"
-      @drop="drop"
+  <v-row>
+    <v-col
+      cols="12"
+      sm="7"
     >
-      <input
-        type="file"
-        name="file"
-        id="fileInput"
-        class="hidden-input"
-        @change="onChange"
-        ref="file"
-        accept=".ipynb, .html"
-      />
+      <h1 class="d-flex justify-center mt-15">Turn your Jupyter Notebook into a beautiful dashboard.</h1>
+      <p class="d-flex justify-center">Drag and resize the elements of your notebook to create a dashboard, no additional code is required.</p>
+      <p class="d-flex justify-center">Works with Plotly, Bokeh, Pyecharts, Vega-Altair, or any other data visualization library.</p>
+      <div
+        class="dropzone-container d-flex mt-5"
+        @dragover="dragover"
+        @dragleave="dragleave"
+        @drop="drop"
+      >
+        <input
+          type="file"
+          name="file"
+          id="fileInput"
+          class="hidden-input"
+          @change="onChange"
+          ref="file"
+          accept=".ipynb, .html"
+        />
 
-      <label for="fileInput" class="file-label">
-        <div class="d-flex justify-center">
-          <div v-if="isDragging">Release to drop files here.</div>
-          <div v-else>
-            <div v-if="file === null">
-              <u>Drop your notebook here or click to upload.</u>
-            </div>
+        <label for="fileInput" class="file-label">
+          <div class="d-flex justify-center">
+            <div v-if="isDragging">Release to drop files here.</div>
             <div v-else>
-              <v-progress-circular indeterminate></v-progress-circular>
-              <span>{{loaderMessage}}</span>
+              <div v-if="file === null">
+                <u>Drop your notebook here or click to upload.</u>
+              </div>
+              <div v-else>
+                <v-progress-circular indeterminate></v-progress-circular>
+                <span>{{loaderMessage}}</span>
+              </div>
             </div>
           </div>
-        </div>
-      </label>
-    </div>
-    <v-container fluid class="bg-surface-variant mt-10">
-    <h2 class="d-flex justify-center">Example Gallery</h2>
-    <div class="d-flex justify-center mt-3">
-      <div style="max-width: 900px">
-      <v-row justify="center">
-        <v-col v-for="dashboard in dashboards"
-          cols="12"
-          sm="5"
-          class="d-flex justify-center"
-        >
-          <DashboardCard
-            :title="dashboard.title"
-            :imageUrl="dashboard.imageUrl"
-	    :linkUrl="dashboard.linkUrl"
-          />
-        </v-col>
-      </v-row>
+        </label>
       </div>
-    </div>
-  </v-container>
+    </v-col>
+    <v-col
+      cols="12"
+      sm="5"
+    >
+      <video width="75%" loop autoplay muted>
+        <source src="/videos/tutorial.webm" type="video/webm">
+        Your browser does not support the video tag.
+      </video>
+    </v-col>
+  </v-row>
+  <v-container fluid class="bg-surface-variant mt-10">
+      <h2 class="d-flex justify-center">Example Gallery</h2>
+      <div class="d-flex justify-center mt-3">
+        <div style="max-width: 1400px">
+        <v-row justify="center">
+          <v-col v-for="dashboard in dashboards"
+            cols="12"
+            sm="5"
+            class="d-flex justify-center"
+          >
+            <DashboardCard
+              :title="dashboard.title"
+              :imageUrl="dashboard.imageUrl"
+              :linkUrl="dashboard.linkUrl"
+            />
+          </v-col>
+        </v-row>
+        </div>
+      </div>
   </v-container>
 </template>
 
@@ -67,10 +82,10 @@ export default {
       fileContent: null,
       loaderMessage: '',
       dashboards: [
-        {"title": "stefan", "linkUrl": "/dashboards/iowa_liquor_sales_dashboard.html", "imageUrl": "/images/iowa_liquor_sales_dashboard.jpg"},
-        {"title": "stefan", "linkUrl": "/dashboards/iowa_liquor_sales_dashboard.html", "imageUrl": "/images/iowa_liquor_sales_dashboard.jpg"},
-        {"title": "stefan", "linkUrl": "/dashboards/iowa_liquor_sales_dashboard.html", "imageUrl": "/images/iowa_liquor_sales_dashboard.jpg"},
-        {"title": "stefan", "linkUrl": "/dashboards/iowa_liquor_sales_dashboard.html", "imageUrl": "/images/iowa_liquor_sales_dashboard.jpg"},
+        {"title": "Singapore at a Glance", "linkUrl": "/dashboards/iowa_liquor_sales_dashboard.html", "imageUrl": "/images/singapore_at_a_glance.webp"},
+        {"title": "Fuel Prices in France", "linkUrl": "/dashboards/iowa_liquor_sales_dashboard.html", "imageUrl": "/images/fuel_prices_in_france.webp"},
+        {"title": "Iowa Liquor Retail Sales", "linkUrl": "/dashboards/iowa_liquor_sales_dashboard.html", "imageUrl": "/images/iowa_liquor_retail_sales.webp"},
+        {"title": "Los Angeles Homicides", "linkUrl": "/dashboards/iowa_liquor_sales_dashboard.html", "imageUrl": "/images/los_angeles_homicides.webp"},
       ]
     };
   },
