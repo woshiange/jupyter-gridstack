@@ -23,9 +23,6 @@ export default defineNuxtConfig({
     }
   },
   devtools: { enabled: true },
-  app: {
-    baseURL: '/jupyter-gridstack/'
-  },
 
   googleFonts: {
     families: {
