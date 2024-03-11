@@ -19,46 +19,126 @@ class Cell {
     this.bokehEl = getElementByXpath("//script[contains(text(), 'root.Bokeh.embed')]/../../..//div[@data-root-id]", this.dom)
   }
 
-  get type() {
-    var result = ''
-    switch (true) {
-      case this.echartsEl !== null:
-        result = 'echarts'
-        break
-      case this.markdownEl !== null:
-        result = 'markdown'
-        break
-      case this.plotlyEl !== null:
-        result = 'plotly'
-        break
-      case this.vegaEl !== null:
-        result = 'vega'
-        break
-      case this.bokehEl !== null:
-        result = 'bokeh'
-        break
-      case this.renderedHTML !== null:
-        result = 'renderedHTML'
-        break
-      default:
-        result = 'default'
-        break
-    }
-    return result
-  }
 
   hasOutput() {
     return !(getElementByXpath("//*[contains(@class, 'jp-mod-noOutputs')]", this.dom))
   }
 
+  echarts() {
+    const mainDiv = this.el.querySelector('div[id]')
+    mainDiv.setAttribute("style", "width:100%; height:100%;")
+    mainDiv.setAttribute('resize-type', 'echarts')
+    return mainDiv.parentElement.innerHTML
+  }
 
+  markdown() {
+    const newDiv = document.createElement('div')
+    newDiv.classList.add('default-cell')
+    newDiv.innerHTML = this.el.querySelectorAll('.jp-MarkdownOutput')[0].innerHTML
+    return newDiv.outerHTML
+  }
+
+  plotly() {
+    const mainDiv = this.el.querySelector('div.plotly-graph-div') 
+    mainDiv.setAttribute("style", "width:100%; height:100%;")
+    mainDiv.setAttribute('resize-type', 'plotly')
+    return mainDiv.parentElement.outerHTML
+  }
+
+  vega() {
+    this.vegaEl.querySelectorAll("div")[0].setAttribute('resize-type', 'vega')
+    const newDiv = document.createElement('div')
+    newDiv.append(this.vegaEl.querySelectorAll("div")[0])
+    newDiv.append(this.vegaEl.querySelectorAll("script")[0])
+    return newDiv.innerHTML
+  }
+
+  bokeh() {
+    var bokehScript
+    var bokehScriptContent
+    var scripts = this.el.getElementsByTagName('script')
+    for (var i = 0; i < scripts.length; i++) {
+      var script = scripts[i];
+      if (script.textContent.indexOf('root.Bokeh.embed') !== -1) {
+        bokehScript = script
+      }
+    }
+    var lines = bokehScript.textContent.split("\n")
+    let dataJson
+    let newDiv
+    for (let i = 0; i < lines.length; i++) {
+      if(lines[i].includes('const docs_json =')) {
+        dataJson = lines[i]
+      }
+    }
+    if (dataJson) { 
+      dataJson = dataJson.substring(dataJson.indexOf('{'), dataJson.lastIndexOf(';'))
+      let dataBokeh = JSON.parse(dataJson)
+      let dataBokehRoots = dataBokeh[Object.keys(dataBokeh)[0]]['roots']
+      for (let i = 0; i < dataBokehRoots.length; i++) {
+        dataBokehRoots[i]["attributes"]["sizing_mode"] = "stretch_both"
+      }
+      bokehScriptContent = bokehScript.textContent.replace(dataJson, JSON.stringify(dataBokeh)) 
+      let renderJson
+      for (let i = 0; i < lines.length; i++) {
+        if(lines[i].includes('const render_items =')) {
+          renderJson = lines[i]
+        }
+      }
+      renderJson = renderJson.substring(renderJson.indexOf('['), renderJson.lastIndexOf(';'))
+      let renderBokeh = JSON.parse(renderJson)
+      let renderId = Object.keys(renderBokeh[0]['roots'])[0]
+      let divId = renderBokeh[0]['roots'][renderId]
+      bokehScriptContent = bokehScriptContent.replace('if (attempts > 100)', 'if (attempts > 1000)')
+      bokehScript.textContent = bokehScriptContent
+      newDiv = document.createElement('div')
+      newDiv.setAttribute('data-root-id', renderId)
+      newDiv.setAttribute('id', divId)
+      newDiv.style.display = 'contents'
+    } else {
+      newDiv = this.el.cloneNode(true)
+    }
+    return newDiv.outerHTML
+  }
+
+  default() {
+    const newDiv = document.createElement('div')
+    newDiv.classList.add('default-cell')
+    newDiv.appendChild(this.el.cloneNode(true))
+    return newDiv.outerHTML
+  }
+
+  get extractFunction() {
+    var result
+    switch (true) {
+      case this.echartsEl !== null:
+        result = this.echarts
+        break
+      case this.markdownEl !== null:
+        result = this.markdown
+        break
+      case this.plotlyEl !== null:
+        result = this.plotly
+        break
+      case this.vegaEl !== null:
+        result = this.vega
+        break
+      case this.bokehEl !== null:
+        result = this.bokeh
+        break
+      default:
+        result = this.default
+        break
+    }
+    return result
+  }
 
   pipeline() {
     if (!this.hasOutput()) {
       this.el.remove()
       return
     }
-    if (this.type !== 'markdown') {
+    if (this.markdownEl == null) {
   
       this.el.querySelectorAll('.jp-Cell-inputWrapper').forEach(el => {
         el.remove()
@@ -67,102 +147,9 @@ class Cell {
         el.remove()
       })
     }
-    //this.el.classList.add('grid-stack-item-content')
-    var div = document.createElement('div');
-    if(this.type === 'echarts') {
-      const mainDiv = this.el.querySelector('div[id]')
-      const divId = mainDiv.getAttribute('id')
-      mainDiv.setAttribute("style", "width:100%; height:100%;")
-      mainDiv.classList.add('my-echarts')
-      mainDiv.setAttribute('resize-type', 'echarts')
-      div.innerHTML = mainDiv.parentElement.innerHTML
-    } else if (this.type === 'markdown') {
-      const newDiv = document.createElement('div')
-      newDiv.classList.add('default-cell')
-      newDiv.innerHTML = this.el.querySelectorAll('.jp-MarkdownOutput')[0].innerHTML
-      div.appendChild(newDiv)
-    } else if (this.type === 'plotly') {
-      const mainDiv = this.el.querySelector('div.plotly-graph-div') 
-      mainDiv.setAttribute("style", "width:100%; height:100%;")
-      mainDiv.classList.add('my-plotly')
-      mainDiv.setAttribute('resize-type', 'plotly')
-      div.innerHTML = mainDiv.parentElement.innerHTML
-    } else if (this.type === 'vega') {
-      this.vegaEl.querySelectorAll("div")[0].classList.add('my-vega')
-      this.vegaEl.querySelectorAll("div")[0].setAttribute('resize-type', 'vega')
-      var styleElement = this.vegaEl.querySelector("style")
-      //styleElement.parentNode.removeChild(styleElement)
-      this.vegaEl.classList.add('my-vega')
-      div.append(this.vegaEl.querySelectorAll("div")[0])
-      div.append(this.vegaEl.querySelectorAll("script")[0])
-    } else if (this.type === 'bokeh') {
-      //div.append(document.querySelectorAll('[data-root-id]')[0])
-      //div.append(document.querySelector('script'))
-      //div.innerHTML = this.bokehEl.innerHTML
-      var bokehScript
-      var bokehScriptContent
-      //var bokehScript = getElementByXpath("//script[contains(text(), 'root.Bokeh.embed')]", this.dom).innerHTML
-      //var scripts = this.dom.getElementsByTagName('script')
-      var scripts = this.el.getElementsByTagName('script')
-      for (var i = 0; i < scripts.length; i++) {
-        var script = scripts[i];
-        if (script.textContent.indexOf('root.Bokeh.embed') !== -1) {
-          bokehScript = script
-        }
-      }
-      var lines = bokehScript.textContent.split("\n")
-      let dataJson
-      for (let i = 0; i < lines.length; i++) {
-        if(lines[i].includes('const docs_json =')) {
-          dataJson = lines[i]
-        }
-      }
-      if (dataJson) { 
-        dataJson = dataJson.substring(dataJson.indexOf('{'), dataJson.lastIndexOf(';'))
-        let dataBokeh = JSON.parse(dataJson)
-	let dataBokehRoots = dataBokeh[Object.keys(dataBokeh)[0]]['roots']
-	for (let i = 0; i < dataBokehRoots.length; i++) {
-          dataBokehRoots[i]["attributes"]["sizing_mode"] = "stretch_both"
-        }
-        bokehScriptContent = bokehScript.textContent.replace(dataJson, JSON.stringify(dataBokeh)) 
-	let renderJson
-        for (let i = 0; i < lines.length; i++) {
-          if(lines[i].includes('const render_items =')) {
-            renderJson = lines[i]
-          }
-        }
-        renderJson = renderJson.substring(renderJson.indexOf('['), renderJson.lastIndexOf(';'))
-        let renderBokeh = JSON.parse(renderJson)
-	let renderId = Object.keys(renderBokeh[0]['roots'])[0]
-	let divId = renderBokeh[0]['roots'][renderId]
-        bokehScriptContent = bokehScriptContent.replace('if (attempts > 100)', 'if (attempts > 1000)')
-        bokehScript.textContent = bokehScriptContent
-        //bokehScript = 'setTimeout(function() { ' + bokehScript + ' }, 0)'
-	const newDiv = document.createElement('div')
-	newDiv.setAttribute('data-root-id', renderId)
-	newDiv.setAttribute('id', divId)
-	newDiv.style.display = 'contents'
-
-        div.append(newDiv)
-
-        //var script = document.createElement('script')
-        //script.appendChild(document.createTextNode(bokehScript))
-        //document.body.appendChild(script)
-        //div.appendChild(script)
-      } else {
-        div.appendChild(this.el.cloneNode(true))
-      }
-    } else {
-      const newDiv = document.createElement('div')
-      newDiv.classList.add('default-cell')
-      newDiv.appendChild(this.el.cloneNode(true))
-      div.appendChild(newDiv)
-    }
-    
-    
-    //loadScripts(this.dom)
-    return div.innerHTML
+    return this.extractFunction()
   }
+
 }
 
 function loadHeadStyles(notebookHtml) {
