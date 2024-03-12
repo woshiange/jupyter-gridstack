@@ -4,16 +4,16 @@
     <v-col
       sm="12"
     >
-      <h1 :class="(mdAndDown ? 'text-h3 mt-5' : 'text-h1 mt-15') + ' title'">
-        Turn your Jupyter Notebook into a beautiful
+      <h1 :class="(mdAndDown ? 'text-h3 mt-5' : 'text-h2 mt-15') + ' title'">
+	Transform your Jupyter Notebook into a beautiful
         <span style="color: #509EE3;">dashboard.</span>
       </h1>
     </v-col>
     <v-col
       cols="12"
-      sm="7"
+      md="6"
     >
-      <p class="description text-h5">Drag and resize the elements of your notebook to create a dashboard, no additional code is required.</p>
+      <p class="description text-h5">Drag and resize notebook elements to craft your dashboard without any extra code.</p>
       <div
         class="dropzone-container d-flex mt-10"
         @dragover="dragover"
@@ -48,10 +48,18 @@
     </v-col>
     <v-col
       cols="12"
-      sm="5"
+      md="6"
       class="d-flex justify-center"
     >
-      <video width="100%" loop autoplay muted class="mt-10 elevation-6">
+      <video
+        class="mt-10 elevation-6"
+	width="75%"
+	:style="mdAndDown ? 'max-width: 429px;' : ''"
+	loop
+	autoplay
+	muted
+	cover
+      >
         <source src="/videos/tutorial.webm" type="video/webm">
         Your browser does not support the video tag.
       </video>
@@ -66,18 +74,19 @@
       <h2 class="mt-5 example-gallery">Example Gallery</h2>
     </v-col>
   </v-row>
-        <v-row justify="center">
-          <v-col v-for="dashboard in dashboards"
-            cols="12"
-            sm="5"
-            class="d-flex justify-center"
-          >
-            <DashboardCard
-              :title="dashboard.title"
-              :imageUrl="dashboard.imageUrl"
-              :linkUrl="dashboard.linkUrl"
-            />
-          </v-col>
+  <v-row>
+    <v-col v-for="(dashboard, index) in dashboards"
+      :key="index"
+      cols="12"
+      md="6"
+      :class="'d-flex ' + (smAndDown ? 'justify-center' : (index % 2 === 0 ? 'justify-end' : 'justify-beggining'))"
+    >
+      <DashboardCard
+        :title="dashboard.title"
+        :imageUrl="dashboard.imageUrl"
+        :linkUrl="dashboard.linkUrl"
+       />
+    </v-col>
   </v-row>
   </v-container>
 </template>
@@ -88,6 +97,7 @@ import { useDisplay } from 'vuetify'
 export default {
   data() {
     return {
+      smAndDown: false,
       mdAndDown: false,
       isDragging: false,
       files: [],
@@ -95,10 +105,10 @@ export default {
       fileContent: null,
       loaderMessage: '',
       dashboards: [
-        {"title": "Singapore at a Glance", "linkUrl": "/dashboards/iowa_liquor_sales_dashboard.html", "imageUrl": "/images/singapore_at_a_glance.webp"},
-        {"title": "Fuel Prices in France", "linkUrl": "/dashboards/iowa_liquor_sales_dashboard.html", "imageUrl": "/images/fuel_prices_in_france.webp"},
-        {"title": "Iowa Liquor Retail Sales", "linkUrl": "/dashboards/iowa_liquor_sales_dashboard.html", "imageUrl": "/images/iowa_liquor_retail_sales.webp"},
-        {"title": "Los Angeles Homicides", "linkUrl": "/dashboards/iowa_liquor_sales_dashboard.html", "imageUrl": "/images/los_angeles_homicides.webp"},
+        {"title": "Bokeh", "linkUrl": "/dashboards/fuel_prices_in_france_dashboard.html", "imageUrl": "/images/fuel_prices_in_france.webp"},
+        {"title": "Pyecharts", "linkUrl": "/dashboards/singapore_at_a_glance_dashboard.html", "imageUrl": "/images/singapore_at_a_glance.webp"},
+        {"title": "Vega Altair", "linkUrl": "/dashboards/los_angeles_homicides_dashboard.html", "imageUrl": "/images/los_angeles_homicides.webp"},
+        {"title": "Plotly", "linkUrl": "/dashboards/iowa_liquor_retail_sales_dashboard.html", "imageUrl": "/images/iowa_liquor_retail_sales.webp"},
       ]
     };
   },
@@ -112,8 +122,9 @@ export default {
     ...mapStores(useNotebook)
   },
   mounted() {
-    const { mdAndDown } = useDisplay()
+    const { mdAndDown, smAndDown } = useDisplay()
     this.mdAndDown = mdAndDown
+    this.smAndDown = smAndDown
   },
   methods: {
     onChange() {
@@ -146,35 +157,9 @@ export default {
       const rootElement = htmlDocument.documentElement;
       return rootElement
     },
-    savegetTrashNotebook () {
-      const parser = new DOMParser();
-
-// Step 2: Parse the string variable as an XML document
-      const htmlDocument = parser.parseFromString(this.fileContent, 'text/html');
-
-// Step 3: Extract the document element (root) from the parsed XML document
-      const rootElement = htmlDocument.documentElement;
-      const link = document.createElement('link');
-      link.href = 'https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css'
-      link.rel = 'stylesheet'
-      //rootElement.getElementsByTagName('head')[0].appendChild(link);
-      const script = document.createElement('script')
-      script.src = 'https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js'
-      //rootElement.getElementsByTagName('head')[0].appendChild(script);
-      const referenceNode = rootElement.querySelector('meta[name="viewport"]')
-      referenceNode.parentNode.insertBefore(script, referenceNode.nextSibling)
-      referenceNode.parentNode.insertBefore(link, referenceNode.nextSibling)
-      //rootElement.getElementsByTagName('head')[0].append(link, script);
-      const scriptBody = document.createElement('script')
-      scriptBody.defer = true
-      scriptBody.src = 'http://0.0.0.0:8000/trash.js'
-      rootElement.getElementsByTagName('body')[0].appendChild(scriptBody);
-      return rootElement
-    }
   },
   watch: {
     file() {
-      console.log('file')
       const reader = new FileReader()
       reader.onload = () => {
         if(this.fileExtension === 'ipynb') {
@@ -188,7 +173,6 @@ export default {
       reader.readAsText(this.file)
     },
     fileContent() {
-      console.log("fileContent")
       this.notebookStore.notebook = this.getNotebook().outerHTML
       this.notebookStore.fileName = this.fileName
       this.$router.push({ name: 'edit' })
@@ -199,27 +183,27 @@ export default {
 
 <style scoped>
 .dropzone-container {
-    padding: 4rem;
-    border: 1px solid #e2e8f0;
-    margin: 0 auto;
-    width: 80%;
-    background-color: #f7fafc;
+  padding: 4rem;
+  border: 1px solid #e2e8f0;
+  margin: 0 auto;
+  width: 80%;
+  background-color: #f7fafc;
 }
 
 .hidden-input {
-    opacity: 0;
-    overflow: hidden;
-    position: absolute;
-    width: 1px;
-    height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  width: 1px;
+  height: 1px;
 }
 
 .file-label {
-    font-size: 20px;
-    display: block;
-    cursor: pointer;
-    margin: 0 auto;
-    width: 100%;
+  font-size: 20px;
+  display: block;
+  cursor: pointer;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .title {

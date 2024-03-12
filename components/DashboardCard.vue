@@ -6,12 +6,11 @@
         :elevation="isHovering ? 12 : 2"
         v-bind="props"
       >
-        <v-card-title>{{ title }}</v-card-title>
+        <v-card-title class="d-flex justify-center">{{ title }}</v-card-title>
         <v-img
           :src="imageUrl"
           :alt="title"
           width="379"
-          height="352"
           class="position-relative"
         >
           <div class="align-self-center absolute-center">
