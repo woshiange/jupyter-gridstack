@@ -6,7 +6,7 @@
     >
       <h1 :class="(mdAndDown ? 'text-h3 mt-5' : 'text-h2 mt-15') + ' title'">
 	Transform your Jupyter Notebook into a beautiful
-        <span style="color: #509EE3;">dashboard.</span>
+        <span style="color: #509EE3;">dashboards.</span>
       </h1>
     </v-col>
     <v-col

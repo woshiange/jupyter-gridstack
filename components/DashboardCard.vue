@@ -11,6 +11,7 @@
           :src="imageUrl"
           :alt="title"
           width="379"
+          height="484"
           class="position-relative"
         >
           <div class="align-self-center absolute-center">
