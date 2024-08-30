@@ -144,10 +144,13 @@ export default {
       this.onChange();
       this.isDragging = false;
     },
-    async convertIpynbTokHtml (notebookIpynb) {
-      const response = await this.$axios.$post(
-        'https://asia-southeast2-dataviz-374817.cloudfunctions.net/ipynb_to_html',
-        { notebookSource: notebookIpynb }
+    async convertIpynbTokHtml () {
+      const formData = new FormData()
+      formData.append('file', this.file)
+      console.log('ok')
+      const response = await $fetch(
+      	'https://nb-convert-c6hxgtv5sa-et.a.run.app/upload',
+	{method: 'POST', body: formData}
       )
       return this.fileContent = response
     },
@@ -160,17 +163,17 @@ export default {
   },
   watch: {
     file() {
-      const reader = new FileReader()
-      reader.onload = () => {
-        if(this.fileExtension === 'ipynb') {
-          this.loaderMessage = 'Converting Ipynb to Html...'
-          this.convertIpynbTokHtml(reader.result)
-        } else {
+      if(this.fileExtension === 'ipynb') {
+        this.loaderMessage = 'Converting Ipynb to Html...'
+	this.convertIpynbTokHtml()
+      } else {
+        const reader = new FileReader()
+        reader.onload = () => {
           this.loaderMessage = '   Loading...'
           this.fileContent = reader.result
         }
+        reader.readAsText(this.file)
       }
-      reader.readAsText(this.file)
     },
     fileContent() {
       this.notebookStore.notebook = this.getNotebook().outerHTML
