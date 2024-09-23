@@ -317,12 +317,6 @@ async function start() {
 
       loadScripts(notebookHtml)
 
-/*
-      setTimeout(function() {
-        console.log('load script')
-        loadScripts(notebookHtml)
-      }, 0)
-*/
 
       window.addEventListener("resize", function(event){
         if(edit) {
@@ -330,20 +324,6 @@ async function start() {
         }
       }, true)
 
-	/*
-      const defaultCells = document.querySelectorAll('.default-cell')
-      defaultCells.forEach(cell => {
-        const parent = cell.parentElement
-	parent.classList.add('parent-of-default-cell')
-      })
-      */
-
-	/*
-      grid.on('added removed change', function() {
-	console.log('grid change')
-        adjustGridHeight()
-      })
-      */
 	
 
 	    
@@ -604,10 +584,45 @@ function removeCardEditStyle() {
 }
 
 
-async function fetchNotebookFromUrl() {
+async function fetchNotebookHtmlFromUrl() {
   const response = await fetch(urlNotebook)
   const html = await response.text()
   return html
+}
+
+
+async function fetchNotebookIpynbFromUrl() {
+  addLoaderIpynbText()
+  const response = await fetch(
+    'https://nb-convert-711948864152.asia-southeast2.run.app/from-url',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ url: urlNotebook })
+    }
+  )
+  const html = await response.text()
+  removeLoaderIpynbText()
+  return html
+}
+
+
+function addLoaderIpynbText() {
+  var newDiv = document.createElement("div")
+  newDiv.style.marginTop = "10px"
+  newDiv.textContent = "Converting ipynb to html"
+  newDiv.id = "loader-text"
+  document.getElementById("loader-container").appendChild(newDiv)
+}
+
+
+function removeLoaderIpynbText() {
+  var loaderText = document.getElementById("loader-text")
+  if (loaderText) {
+    loaderText.remove()
+  }
 }
 
 
@@ -623,8 +638,12 @@ async function fetchNotebook() {
   if (typeof urlNotebook === 'undefined') {
     return fetchNotebookFromScript()
   }
-  return await fetchNotebookFromUrl()
+  if (urlNotebook.toLowerCase().endsWith(".ipynb")) {
+    return await fetchNotebookIpynbFromUrl()
+  }
+  return await fetchNotebookHtmlFromUrl()
 }
+
 
 function modifyNotebook(notebook) {
   const parser = new DOMParser()
@@ -646,6 +665,7 @@ function modifyNotebook(notebook) {
   return rootElement.outerHTML
 }
 
+
 async function saveToIndexedDb () {
   var notebook = await fetchNotebook()
   notebook = modifyNotebook(notebook)
@@ -664,6 +684,7 @@ async function saveToIndexedDb () {
   }
 }
 
+
 function getSavedData() {
   var savedData = grid.save()
   savedData.forEach(object => {
@@ -671,6 +692,7 @@ function getSavedData() {
   })
   return savedData
 }
+
 
 function download() {
   const template = `
@@ -737,7 +759,6 @@ function populateNotebookIframe() {
     }
   }
 }
-
 
 
 function addHtml() {

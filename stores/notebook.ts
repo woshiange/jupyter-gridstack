@@ -1,7 +1,8 @@
 export const useNotebook = defineStore('notebook', {
   state: () => ({
     notebook: null,
-    fileName: null
+    fileName: null,
+    urlNotebook: null
   }),
   getters: {
     templateHTML(state) {
@@ -15,8 +16,8 @@ export const useNotebook = defineStore('notebook', {
           <link href="https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet">
           <script src="https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js"></script>
           <script src="https://code.iconify.design/1/1.0.6/iconify.min.js"></script>
-          <link href="https://jupyter-gridstack.pages.dev/2.0/zlatko.css" rel="stylesheet">
-          <script src="https://jupyter-gridstack.pages.dev/2.0/zlatko.js" defer=""></script>
+          <link href="http://localhost:5080/2.0/zlatko.css" rel="stylesheet">
+          <script src="http://localhost:5080/2.0/zlatko.js" defer=""></script>
         </head>
         <body>
           <div id="loader-container">
@@ -34,6 +35,9 @@ export const useNotebook = defineStore('notebook', {
       return parser.parseFromString(template, 'text/html')
     },
     transformedNotebook(state) {
+      if(!state.notebook) {
+        return null
+      }
       const encodedNotebook = btoa(unescape(encodeURIComponent(state.notebook)))
       const templateHTML = state.templateHTML
       const bodyElement = templateHTML.querySelector('body')
@@ -43,13 +47,23 @@ export const useNotebook = defineStore('notebook', {
       bodyElement.appendChild(scriptElement)
       return templateHTML.documentElement.outerHTML
     },
-    urlNotebook(state) {
+    notebookFromUrl(state) {
       const templateHTML = state.templateHTML
       const bodyElement = templateHTML.querySelector('body')
       const scriptElement = document.createElement('script')
-      scriptElement.textContent = `var urlNotebook = "https://woshiange.github.io/jupyter-gridstack/python/singapore_at_a_glance.html"`
+
+      let urlNotebookCleaned
+      if (state.urlNotebook.includes("github.com")) {
+        urlNotebookCleaned = state.urlNotebook
+            .replace("github.com", "raw.githubusercontent.com")
+            .replace("/blob/", "/")
+      } else {
+        urlNotebookCleaned = state.urlNotebook
+      }
+
+      scriptElement.textContent = `var urlNotebook = "${urlNotebookCleaned}"`
       bodyElement.appendChild(scriptElement)
       return templateHTML.documentElement.outerHTML
-    },
+    }
   }
 })

@@ -16,11 +16,14 @@ const notebookStore = useNotebook()
 
 
 onMounted(() => {
-  if(!notebookStore.notebook && !notebookStore.transformedNotebookFromEdit) {
+  if(!(notebookStore.notebook || notebookStore.urlNotebook)) {
     router.push({ name: 'index' })
   }
-  iframeContent.value = notebookStore.transformedNotebook
-  //iframeContent.value = notebookStore.urlNotebook
+  if(notebookStore.notebook) {
+    iframeContent.value = notebookStore.transformedNotebook
+  } else {
+    iframeContent.value = notebookStore.notebookFromUrl
+  }
 });
 
 </script>
