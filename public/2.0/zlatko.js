@@ -656,7 +656,7 @@ function modifyNotebook(notebook) {
       if (!scriptContent.includes('waitSeconds')) {
         const modifiedScriptContent = scriptContent.replace(
           'require.config({',
-          'require.config({\n    waitSeconds: 30,'
+          'require.config({\n    waitSeconds: 60,'
 	)
 	currentScript.textContent = modifiedScriptContent
       }

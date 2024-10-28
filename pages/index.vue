@@ -1,19 +1,24 @@
 <template>
-  <v-container>
+  <v-app>
+  <v-main style="background-color: rgb(249, 251, 252);">
+  <v-container style="max-width: 1200px;">
   <v-row>
-    <v-col
-      sm="12"
-    >
-      <h1 :class="(mdAndDown ? 'text-h3 mt-5' : 'text-h2 mt-15') + ' title'">
+      <h1 :class="(mdAndDown ? 'text-h3' : 'text-h2') + ' mt-5 title'">
 	Transform your Jupyter Notebook into a beautiful
         <span style="color: #509EE3;">dashboard.</span>
       </h1>
-    </v-col>
     <v-col
       cols="12"
       md="6"
     >
       <p class="description text-h5">Drag and resize notebook elements to craft a dashboard without any extra code.</p>
+    </v-col>
+  </v-row>
+  <v-row>
+    <v-col
+      cols="12"
+      md="6"
+    >
       <div
         class="dropzone-container d-flex mt-10 mb-10"
         @dragover="dragover"
@@ -55,7 +60,7 @@
         </div>
       </div>
 
-      <div>
+      <div class="mt-n6">
         <div
           v-if="!showForm"
           @click="showFormAndFocus"
@@ -68,7 +73,7 @@
             ref="notebookUrlInput"
             v-model="urlNotebook"
 	    :rules="rules"
-	    messages='e.g.: https://github.com/woshiange/jupyter-python-notebooks/blob/main/singapore_at_a_glance.ipynb'
+	    messages='e.g.: https://github.com/woshiange/jupyter-python-notebooks/blob/main/html/singapore_at_a_glance.html'
             label="Input your Notebook URL (ipynb or html)"
           ></v-text-field>
           <div class="d-flex justify-center">
@@ -81,18 +86,18 @@
     <v-col
       cols="12"
       md="6"
-      class="d-flex justify-center"
+      class="d-flex justify-center order-first order-md-last"
     >
       <video
-        class="mt-10 elevation-6"
+        class="elevation-6"
 	width="75%"
-	:style="mdAndDown ? 'max-width: 429px;' : ''"
+	:style="mdAndDown ? 'max-width: 429px;' : 'margin-top: -100px;'"
 	loop
 	autoplay
 	muted
 	cover
       >
-        <source src="/videos/tutorial.webm" type="video/webm">
+        <source src="/videos/tutorial.mp4" type="video/webm">
         Your browser does not support the video tag.
       </video>
     </v-col>
@@ -121,6 +126,8 @@
     </v-col>
   </v-row>
   </v-container>
+  </v-main>
+   </v-app>
 </template>
 
 <script scoped>
@@ -291,7 +298,7 @@ export default {
   border: 1px solid #e2e8f0;
   margin: 0 auto;
   width: 80%;
-  background-color: #f7fafc;
+  background-color: #f5f5f5;
 }
 
 .hidden-input {
@@ -328,7 +335,7 @@ export default {
 .expansion-panel-title {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 16px;
   cursor: pointer;
   font-family: helvetica, Roboto, serif !important;
