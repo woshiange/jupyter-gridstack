@@ -1,3 +1,4 @@
+
 const isWebsite = typeof fromWebsite !== 'undefined'
 var grid
 var gridTrash
