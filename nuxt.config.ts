@@ -34,6 +34,4 @@ export default defineNuxtConfig({
     },
     display: 'swap'
   },
-
-  compatibilityDate: '2024-11-21',
 })
