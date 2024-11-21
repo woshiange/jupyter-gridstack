@@ -1,11 +1,13 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   pages: true,
+
   modules: [
     '@invictus.codes/nuxt-vuetify',
     '@pinia/nuxt',
     '@nuxtjs/google-fonts'
   ],
+
   vuetify: {
     /* vuetify options */
     vuetifyOptions: {
@@ -22,6 +24,7 @@ export default defineNuxtConfig({
       useVuetifyLabs: false, 
     }
   },
+
   devtools: { enabled: true },
   target: 'static',
 
@@ -31,4 +34,6 @@ export default defineNuxtConfig({
     },
     display: 'swap'
   },
+
+  compatibilityDate: '2024-11-21',
 })
