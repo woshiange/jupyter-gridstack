@@ -34,4 +34,8 @@ export default defineNuxtConfig({
     },
     display: 'swap'
   },
+
+  generate: {
+    dir: 'dist'
+  }
 })
