@@ -136,12 +136,10 @@ import { useDisplay } from 'vuetify'
 export default {
   setup() {
     useSeoMeta({
-      title: 'My Amazing Site',
-      ogTitle: 'My Amazing Site',
-      description: 'This is my amazing site, let me tell you all about it.',
-      ogDescription: 'This is my amazing site, let me tell you all about it.',
-      ogImage: 'https://example.com/image.png',
-      twitterCard: 'summary_large_image',
+      title: 'Dashbortify, transform your Jupyter notebook into a stunning dashboard',
+      ogTitle: 'Dashbortify, transform your Jupyter notebook into a stunning dashboard',
+      description: 'Effortlessly transform your Jupyter notebook into a stunning dashboard. Drag and resize notebook elements to craft a dashboard without any extra code. Works with Bokeh, Pyecharts, Vega Altair and Plotly.',
+      ogDescription: 'Effortlessly transform your Jupyter notebook into a stunning dashboard. Drag and resize notebook elements to craft a dashboard without any extra code. Works with Bokeh, Pyecharts, Vega Altair and Plotly.',
     });
   },
   data() {
