@@ -5,7 +5,6 @@
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
-    "postgenerate": "mv .output/public dist",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
   },
