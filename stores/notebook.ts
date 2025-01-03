@@ -12,12 +12,13 @@ export const useNotebook = defineStore('notebook', {
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	  <link rel="icon" href="https://jupyter-gridstack.pages.dev/favicon.svg" type="image/x-icon">
           <title>title</title>
           <link href="https://jupyter-gridstack.pages.dev/gridstack/gridstack.min.css" rel="stylesheet">
           <script src="https://jupyter-gridstack.pages.dev/gridstack/gridstack-all.js"></script>
           <script src="https://code.iconify.design/1/1.0.6/iconify.min.js"></script>
-          <link href="https://jupyter-gridstack.pages.dev/8.0/zlatko.css" rel="stylesheet">
-          <script src="https://jupyter-gridstack.pages.dev/8.0/zlatko.js" defer=""></script>
+          <link href="https://jupyter-gridstack.pages.dev/10.0/zlatko.css" rel="stylesheet">
+          <script src="https://jupyter-gridstack.pages.dev/10.0/zlatko.js" defer=""></script>
         </head>
         <body>
           <div id="loader-container">
