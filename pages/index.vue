@@ -136,10 +136,10 @@ import { useDisplay } from 'vuetify'
 export default {
   setup() {
     useSeoMeta({
-      title: 'Dashbortify, transform your Jupyter notebook into a stunning dashboard',
-      ogTitle: 'Dashbortify, transform your Jupyter notebook into a stunning dashboard',
-      description: 'Effortlessly transform your Jupyter notebook into a stunning dashboard. Drag and resize notebook elements to craft a dashboard without any extra code. Works with Bokeh, Pyecharts, Vega Altair and Plotly.',
-      ogDescription: 'Effortlessly transform your Jupyter notebook into a stunning dashboard. Drag and resize notebook elements to craft a dashboard without any extra code. Works with Bokeh, Pyecharts, Vega Altair and Plotly.',
+      title: 'Dashboardtify, transform your Jupyter notebook into a beautiful dashboard',
+      ogTitle: 'Dashboardtify, transform your Jupyter notebook into a beautiful dashboard',
+      description: 'Transform your Jupyter notebook into a beautiful dashboard. Drag and resize notebook elements to craft a dashboard without any extra code. Works with Bokeh, Pyecharts, Vega Altair and Plotly.',
+      ogDescription: 'Transform your Jupyter notebook into a beautiful dashboard. Drag and resize notebook elements to craft a dashboard without any extra code. Works with Bokeh, Pyecharts, Vega Altair and Plotly.',
     });
   },
   data() {
@@ -233,7 +233,7 @@ export default {
       const isValid = await this.$refs.form.validate()
       if (isValid.valid) {
         this.notebookStore.urlNotebook = this.urlNotebook
-        this.notebookStore.fileName = 'serbe'
+        this.notebookStore.fileName = this.urlNotebook.split('/').pop().split('.')[0]
         this.$router.push({ name: 'edit' })
       }
     },

@@ -37,5 +37,7 @@ export default defineNuxtConfig({
 
   generate: {
     dir: 'dist'
-  }
+  },
+
+  compatibilityDate: '2024-12-20'
 })
