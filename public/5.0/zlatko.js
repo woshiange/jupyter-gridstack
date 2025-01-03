@@ -709,8 +709,8 @@ function download() {
         <link href="https://jupyter-gridstack.pages.dev/gridstack/gridstack.min.css" rel="stylesheet">
         <script src="https://jupyter-gridstack.pages.dev/gridstack/gridstack-all.js"></script>
         <script src="https://code.iconify.design/1/1.0.6/iconify.min.js"></script>
-        <link href="https://jupyter-gridstack.pages.dev/5.0/zlatko.css" rel="stylesheet">
-        <script src="https://jupyter-gridstack.pages.dev/5.0/zlatko.js" defer=""></script>
+        <link href="https://jupyter-gridstack.pages.dev/6.0/zlatko.css" rel="stylesheet">
+        <script src="https://jupyter-gridstack.pages.dev/6.0/zlatko.js" defer=""></script>
       </head>
       <body>
         <div id="loader-container">
@@ -736,7 +736,7 @@ function download() {
     scriptElement.id = 'scriptEncodedNotebook'
     scriptElement.textContent = `"${encodedNotebook}"`
   }
-  templateHTML.title = state.title
+  templateHTML.title = filename
   bodyElement.appendChild(scriptElement)
   var blob = new Blob([templateHTML.documentElement.outerHTML], { type: 'text/html' })
   var blobUrl = URL.createObjectURL(blob)
